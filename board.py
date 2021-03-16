@@ -9,6 +9,8 @@ root.geometry("1000x1000")
 
 global blackSquares
 global whiteSquares
+global white_pieces = []
+global black_pieces = []
 #labels
 def labels_top():
   top_letters = ["A", "B", "C", "D", "E", "F", "G", "H"]
@@ -126,6 +128,38 @@ def position_board(blackSquares,whiteSquares):
                 board.append(blackSquares[num])
                 board.append(whiteSquares[num])
         return board
+
+''' this is used to store the position of a piece, but we can change this
+later to match the FEN strings'''
+
+board_spaces = []
+for x in range (0,64):
+        board_spaces.append("")
+
+# making the pieces
+
+'''class Piece():
+        def _init_ (self, color, set):
+                self.color = color
+                self.set = set.append(self)
+'''
+
+#pawn
+
+class Pawn():
+        black_pawn = ImageTk.PhotoImage(Image.open("/black_pawn.png"))
+        white_pawn = ImageTk.PhotoImage(Image.open("/white_pawn.png"))
+
+def starting_position(board_spaces, board, black_pieces, white_pieces):
+        for num in range(0,16):
+                piece = bSet[num]
+                board_spaces[num] = piece
+                display = bSet[num].bImage
+                place = board[num].create_image(55,55,image=display)
+                ########this is making a one when it should be storing an object
+                bPlaces[num] = piece
+
+
 
 labels_top()
 blackSquares,whiteSquares = make_board()

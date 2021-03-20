@@ -1,5 +1,5 @@
 import tkinter as tk
-from PIL import ImageTk, ImageTk
+from PIL import ImageTk, ImageTk, Image
 import random
 
 #base window
@@ -7,10 +7,10 @@ root = tk.Tk()
 root.title("Visualizing ML")
 root.geometry("1000x1000")
 
-global blackSquares
-global whiteSquares
-global white_pieces = []
-global black_pieces = []
+blackSquares = []
+whiteSquares = []
+white_pieces = []
+black_pieces = []
 #labels
 def labels_top():
   top_letters = ["A", "B", "C", "D", "E", "F", "G", "H"]
@@ -147,8 +147,8 @@ for x in range (0,64):
 #pawn
 
 class Pawn():
-        black_pawn = ImageTk.PhotoImage(Image.open("/black_pawn.png"))
-        white_pawn = ImageTk.PhotoImage(Image.open("/white_pawn.png"))
+        black_pawn = ImageTk.PhotoImage(Image.open("Images/black_pawn.png"))
+        white_pawn = ImageTk.PhotoImage(Image.open("Images/white_pawn.png"))
 
 def starting_position(board_spaces, board, black_pieces, white_pieces):
         for num in range(0,16):

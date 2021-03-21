@@ -77,33 +77,40 @@ class ChessGui(tk.Frame):
         self.button_quit.pack(side=tk.RIGHT, in_=self.statusbar)
         self.statusbar.pack(expand=False, fill="x", side='bottom')
 
-
     def load_fen(self, fen_string):
+        print('ChessGui.load_fen() executed')
         pass
 
     def click(self, event):
+        print('ChessGui.click() executed')
         pass
 
     def move(self, p1, p2):
+        print('ChessGui.move() executed')
         pass
 
     def highlight(self, pos):
+        print('ChessGui.highlight() executed')
         pass
 
     def addpiece(self, name, image, row=0, column=0):
+        print('ChessGui.addpiece() executed')
         pass
 
     def placepiece(self, name, row, column):
+        print('ChessGui.placepiece() executed')
         pass
 
     def refresh(self, event={}):
+        print('ChessGui.refresh() executed')
         pass
 
     def draw_pieces(self):
-        print('draw_pieces() finished');
+        print('ChessGui.draw_pieces() executed')
         pass
 
     def reset(self):
+        print('ChessGui.reset() executed')
         pass
         
 

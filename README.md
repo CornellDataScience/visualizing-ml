@@ -1,1 +1,2 @@
-# visualizing-ml ALPHAVIZ Project
+# ALPHAVIZ Project
+Created by Cornell Data Science -> Insights -> visualizing-ml team

@@ -7,10 +7,11 @@ root = tk.Tk()
 root.title("Visualizing ML")
 root.geometry("1000x1000")
 
-global blackSquares
-global whiteSquares
+blackSquares = []
+whiteSquares = []
 white_pieces = []
 black_pieces = []
+# labels
 
 
 def labels_top():

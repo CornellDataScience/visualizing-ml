@@ -1,6 +1,6 @@
 # AlphaViz Project
 
-By Cornell Data Science -> Insights Subteam -> Visualizing-ML
+By Cornell Data Science -> Insights Subteam -> Visualizing-ML <br>
 Authors: Alexander Wang, Kevin Zhou, Eric Osband, Pian Pawakapan
 
 ## How to run the AlphaViz GUI

@@ -1,5 +1,5 @@
 from typing import cast
-import constants
+import constantss
 import validateFEN
 import tkinter as tk
 from PIL import Image, ImageTk
@@ -99,21 +99,21 @@ class ChessGui(tk.Frame):
 
     def load_images(self):
         self.IMG_CHESSBOARD = ImageTk.PhotoImage(
-            file=constants.PATH_CHESSBOARD)
-        self.IMG_LTKING = ImageTk.PhotoImage(file=constants.PATH_LTKING)
-        self.IMG_DKKING = ImageTk.PhotoImage(file=constants.PATH_DKKING)
-        self.IMG_LTQUEEN = ImageTk.PhotoImage(file=constants.PATH_LTQUEEN)
-        self.IMG_DKQUEEN = ImageTk.PhotoImage(file=constants.PATH_DKQUEEN)
-        self.IMG_LTROOK = ImageTk.PhotoImage(file=constants.PATH_LTROOK)
-        self.IMG_DKROOK = ImageTk.PhotoImage(file=constants.PATH_DKROOK)
-        self.IMG_LTBISHOP = ImageTk.PhotoImage(file=constants.PATH_LTBISHOP)
-        self.IMG_DKBISHOP = ImageTk.PhotoImage(file=constants.PATH_DKBISHOP)
+            file=constantss.PATH_CHESSBOARD)
+        self.IMG_LTKING = ImageTk.PhotoImage(file=constantss.PATH_LTKING)
+        self.IMG_DKKING = ImageTk.PhotoImage(file=constantss.PATH_DKKING)
+        self.IMG_LTQUEEN = ImageTk.PhotoImage(file=constantss.PATH_LTQUEEN)
+        self.IMG_DKQUEEN = ImageTk.PhotoImage(file=constantss.PATH_DKQUEEN)
+        self.IMG_LTROOK = ImageTk.PhotoImage(file=constantss.PATH_LTROOK)
+        self.IMG_DKROOK = ImageTk.PhotoImage(file=constantss.PATH_DKROOK)
+        self.IMG_LTBISHOP = ImageTk.PhotoImage(file=constantss.PATH_LTBISHOP)
+        self.IMG_DKBISHOP = ImageTk.PhotoImage(file=constantss.PATH_DKBISHOP)
         self.IMG_LTKNIGHT = ImageTk.PhotoImage(
-            file=constants.PATH_LTUNICORN if CORN else constants.PATH_LTKNIGHT)
+            file=constantss.PATH_LTUNICORN if CORN else constantss.PATH_LTKNIGHT)
         self.IMG_DKKNIGHT = ImageTk.PhotoImage(
-            file=constants.PATH_DKUNICORN if CORN else constants.PATH_DKKNIGHT)
-        self.IMG_LTPAWN = ImageTk.PhotoImage(file=constants.PATH_LTPAWN)
-        self.IMG_DKPAWN = ImageTk.PhotoImage(file=constants.PATH_DKPAWN)
+            file=constantss.PATH_DKUNICORN if CORN else constantss.PATH_DKKNIGHT)
+        self.IMG_LTPAWN = ImageTk.PhotoImage(file=constantss.PATH_LTPAWN)
+        self.IMG_DKPAWN = ImageTk.PhotoImage(file=constantss.PATH_DKPAWN)
 
     def load_fen(self, fen_string):
         if DEBUG:
@@ -165,40 +165,40 @@ class ChessGui(tk.Frame):
                 elif character.isdigit():
                     i += int(character)
                 elif character == 'P':
-                    self.board[i] = constants.LTPAWN
+                    self.board[i] = constantss.LTPAWN
                     i += 1
                 elif character == 'p':
-                    self.board[i] = constants.DKPAWN
+                    self.board[i] = constantss.DKPAWN
                     i += 1
                 elif character == 'R':
-                    self.board[i] = constants.LTROOK
+                    self.board[i] = constantss.LTROOK
                     i += 1
                 elif character == 'r':
-                    self.board[i] = constants.DKROOK
+                    self.board[i] = constantss.DKROOK
                     i += 1
                 elif character == 'K':
-                    self.board[i] = constants.LTKING
+                    self.board[i] = constantss.LTKING
                     i += 1
                 elif character == 'k':
-                    self.board[i] = constants.DKKING
+                    self.board[i] = constantss.DKKING
                     i += 1
                 elif character == 'B':
-                    self.board[i] = constants.LTBISHOP
+                    self.board[i] = constantss.LTBISHOP
                     i += 1
                 elif character == 'b':
-                    self.board[i] = constants.DKBISHOP
+                    self.board[i] = constantss.DKBISHOP
                     i += 1
                 elif character == 'Q':
-                    self.board[i] = constants.LTQUEEN
+                    self.board[i] = constantss.LTQUEEN
                     i += 1
                 elif character == 'q':
-                    self.board[i] = constants.DKQUEEN
+                    self.board[i] = constantss.DKQUEEN
                     i += 1
                 elif character == 'N':
-                    self.board[i] = constants.LTKNIGHT
+                    self.board[i] = constantss.LTKNIGHT
                     i += 1
                 elif character == 'n':
-                    self.board[i] = constants.DKKNIGHT
+                    self.board[i] = constantss.DKKNIGHT
                     i += 1
         else:
             if DEBUG:
@@ -238,8 +238,8 @@ class ChessGui(tk.Frame):
         if DEBUG:
             print('ChessGui.draw_pieces() executing...')
         # Starting pixel counts for A1-square
-        x_pos = constants.BOARD_OFFSET  # = 30
-        y_pos = constants.BOARD_SIZE - constants.BOARD_OFFSET - constants.SQUARE_SIZE
+        x_pos = constantss.BOARD_OFFSET  # = 30
+        y_pos = constantss.BOARD_SIZE - constantss.BOARD_OFFSET - constantss.SQUARE_SIZE
         # = 590
 
         for rank in range(0, 8):
@@ -251,52 +251,52 @@ class ChessGui(tk.Frame):
                 # for efficiency. If you are unconvinced, that is okay.
                 # The gist of it is that we check the most likely pieces first
 
-                if self.board[ind] == constants.EMPTY:
+                if self.board[ind] == constantss.EMPTY:
                     # Don't draw anything if the square is empty
                     pass
-                elif self.board[ind] == constants.LTPAWN:
+                elif self.board[ind] == constantss.LTPAWN:
                     self.canvas.create_image(
                         x_pos, y_pos, anchor='nw', image=self.IMG_LTPAWN)
-                elif self.board[ind] == constants.DKPAWN:
+                elif self.board[ind] == constantss.DKPAWN:
                     self.canvas.create_image(
                         x_pos, y_pos, anchor='nw', image=self.IMG_DKPAWN)
-                elif self.board[ind] == constants.LTROOK:
+                elif self.board[ind] == constantss.LTROOK:
                     self.canvas.create_image(
                         x_pos, y_pos, anchor='nw', image=self.IMG_LTROOK)
-                elif self.board[ind] == constants.DKROOK:
+                elif self.board[ind] == constantss.DKROOK:
                     self.canvas.create_image(
                         x_pos, y_pos, anchor='nw', image=self.IMG_DKROOK)
-                elif self.board[ind] == constants.LTKING:
+                elif self.board[ind] == constantss.LTKING:
                     self.canvas.create_image(
                         x_pos, y_pos, anchor='nw', image=self.IMG_LTKING)
-                elif self.board[ind] == constants.DKKING:
+                elif self.board[ind] == constantss.DKKING:
                     self.canvas.create_image(
                         x_pos, y_pos, anchor='nw', image=self.IMG_DKKING)
-                elif self.board[ind] == constants.LTBISHOP:
+                elif self.board[ind] == constantss.LTBISHOP:
                     self.canvas.create_image(
                         x_pos, y_pos, anchor='nw', image=self.IMG_LTBISHOP)
-                elif self.board[ind] == constants.DKBISHOP:
+                elif self.board[ind] == constantss.DKBISHOP:
                     self.canvas.create_image(
                         x_pos, y_pos, anchor='nw', image=self.IMG_DKBISHOP)
-                elif self.board[ind] == constants.LTQUEEN:
+                elif self.board[ind] == constantss.LTQUEEN:
                     self.canvas.create_image(
                         x_pos, y_pos, anchor='nw', image=self.IMG_LTQUEEN)
-                elif self.board[ind] == constants.DKQUEEN:
+                elif self.board[ind] == constantss.DKQUEEN:
                     self.canvas.create_image(
                         x_pos, y_pos, anchor='nw', image=self.IMG_DKQUEEN)
-                elif self.board[ind] == constants.LTKNIGHT:
+                elif self.board[ind] == constantss.LTKNIGHT:
                     self.canvas.create_image(
                         x_pos, y_pos, anchor='nw', image=self.IMG_LTKNIGHT)
-                elif self.board[ind] == constants.DKKNIGHT:
+                elif self.board[ind] == constantss.DKKNIGHT:
                     self.canvas.create_image(
                         x_pos, y_pos, anchor='nw', image=self.IMG_DKKNIGHT)
                 else:
                     print(
                         "[ERROR] ChessGui.draw_pieces(): board[ind] value matches no piece!")
 
-                x_pos += constants.SQUARE_SIZE
+                x_pos += constantss.SQUARE_SIZE
             # End inner for loop
-            x_pos = constants.BOARD_OFFSET
+            x_pos = constantss.BOARD_OFFSET
             y_pos -= 80
         # End outer for loop
     # End draw_pieces()
@@ -323,7 +323,7 @@ class ChessGui(tk.Frame):
             print('ChessGui.immortal() executing...')
         self.canvas.delete('all')
         self.draw_board()
-        self.load_fen(constants.FEN_IMMORTAL_GAME)
+        self.load_fen(constantss.FEN_IMMORTAL_GAME)
         self.draw_pieces()
 
     def clear_board(self):
@@ -332,7 +332,7 @@ class ChessGui(tk.Frame):
 
         self.canvas.delete('all')
         self.draw_board()
-        self.load_fen(constants.FEN_EMPTY)
+        self.load_fen(constantss.FEN_EMPTY)
         self.draw_pieces()
 
     def reset(self):
@@ -342,7 +342,7 @@ class ChessGui(tk.Frame):
         # Reset board state
         self.canvas.delete('all')
         self.draw_board()
-        self.load_fen(constants.FEN_STARTING_POSITION)
+        self.load_fen(constantss.FEN_STARTING_POSITION)
         self.draw_pieces()
 
     def exit(self):

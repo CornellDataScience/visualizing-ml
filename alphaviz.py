@@ -12,10 +12,6 @@ CORN = False
 
 
 class ChessGui(tk.Frame):
-    # GUI display variables
-    selected = None  # selected square
-    selected_piece = None
-    highlighted = None
 
     # Initializes the AlphaViz GUI
     # Sets many instance variables, loads images used for the GUI, creates
@@ -24,6 +20,13 @@ class ChessGui(tk.Frame):
         if DEBUG:
             print("DEBUG MODE: ON")
             print("ChessGui.__init__() executing...")
+
+        # GUI display variables
+        self.selected = None  # selected square
+        self.selected_piece = None
+        self.highlighted = None
+        self.highlight_rect = None  # reference to the previous rectangle that
+
         # Set parent GUI element (most likely root)
         self.parent = parent
 
@@ -211,7 +214,22 @@ class ChessGui(tk.Frame):
 
     def click(self, event):
         if DEBUG:
-            print('ChessGui.click() executing...')
+            print(
+                f'ChessGui.click() executing... at ({event.x_root},{event.y_root})')
+        if self.highlighted_rect != None:
+            self.canvas.delete(self.highlighted_rect)
+
+        x_loc, y_loc = event.x_root, event.y_root
+        x_pos = x_loc - ((x_loc - constantss.BOARD_OFFSET) %
+                         constantss.SQUARE_SIZE)
+        y_pos = (-2 - constantss.SQUARE_SIZE + y_loc -
+                 ((y_loc - constantss.BOARD_OFFSET) % constantss.SQUARE_SIZE))
+        ind = (constantss.BOARD_SIZE - y_pos -
+               constantss.SQUARE_SIZE) // constantss.SQUARE_SIZE * 8
+        ind += (x_pos - constantss.BOARD_OFFSET) // constantss.SQUARE_SIZE
+        self.highlighted_rect = self.canvas.create_rectangle(x_pos, y_pos, x_pos + constantss.SQUARE_SIZE, y_pos + constantss.SQUARE_SIZE,
+                                                             outline="#fb0", fill="#fb0")
+        self.draw_figure(ind, x_pos, y_pos)
 
     def move(self, p1, p2):
         if DEBUG:
@@ -234,6 +252,55 @@ class ChessGui(tk.Frame):
         if DEBUG:
             print('ChessGui.refresh() executing...')
 
+    def draw_figure(self, ind, x_pos, y_pos):
+        # The ordering of these if statements were created in the wee hours
+        # of the night by Zander. The logic is strange but they matter
+        # for efficiency. If you are unconvinced, that is okay.
+        # The gist of it is that we check the most likely pieces first
+
+        if self.board[ind] == constantss.EMPTY:
+            # Don't draw anything if the square is empty
+            pass
+        elif self.board[ind] == constantss.LTPAWN:
+            self.canvas.create_image(
+                x_pos, y_pos, anchor='nw', image=self.IMG_LTPAWN)
+        elif self.board[ind] == constantss.DKPAWN:
+            self.canvas.create_image(
+                x_pos, y_pos, anchor='nw', image=self.IMG_DKPAWN)
+        elif self.board[ind] == constantss.LTROOK:
+            self.canvas.create_image(
+                x_pos, y_pos, anchor='nw', image=self.IMG_LTROOK)
+        elif self.board[ind] == constantss.DKROOK:
+            self.canvas.create_image(
+                x_pos, y_pos, anchor='nw', image=self.IMG_DKROOK)
+        elif self.board[ind] == constantss.LTKING:
+            self.canvas.create_image(
+                x_pos, y_pos, anchor='nw', image=self.IMG_LTKING)
+        elif self.board[ind] == constantss.DKKING:
+            self.canvas.create_image(
+                x_pos, y_pos, anchor='nw', image=self.IMG_DKKING)
+        elif self.board[ind] == constantss.LTBISHOP:
+            self.canvas.create_image(
+                x_pos, y_pos, anchor='nw', image=self.IMG_LTBISHOP)
+        elif self.board[ind] == constantss.DKBISHOP:
+            self.canvas.create_image(
+                x_pos, y_pos, anchor='nw', image=self.IMG_DKBISHOP)
+        elif self.board[ind] == constantss.LTQUEEN:
+            self.canvas.create_image(
+                x_pos, y_pos, anchor='nw', image=self.IMG_LTQUEEN)
+        elif self.board[ind] == constantss.DKQUEEN:
+            self.canvas.create_image(
+                x_pos, y_pos, anchor='nw', image=self.IMG_DKQUEEN)
+        elif self.board[ind] == constantss.LTKNIGHT:
+            self.canvas.create_image(
+                x_pos, y_pos, anchor='nw', image=self.IMG_LTKNIGHT)
+        elif self.board[ind] == constantss.DKKNIGHT:
+            self.canvas.create_image(
+                x_pos, y_pos, anchor='nw', image=self.IMG_DKKNIGHT)
+        else:
+            print(
+                "[ERROR] ChessGui.draw_pieces(): board[ind] value matches no piece!")
+
     def draw_pieces(self):
         if DEBUG:
             print('ChessGui.draw_pieces() executing...')
@@ -246,53 +313,7 @@ class ChessGui(tk.Frame):
             for file in range(0, 8):
                 ind = rank*8 + file
 
-                # The ordering of these if statements were created in the wee hours
-                # of the night by Zander. The logic is strange but they matter
-                # for efficiency. If you are unconvinced, that is okay.
-                # The gist of it is that we check the most likely pieces first
-
-                if self.board[ind] == constantss.EMPTY:
-                    # Don't draw anything if the square is empty
-                    pass
-                elif self.board[ind] == constantss.LTPAWN:
-                    self.canvas.create_image(
-                        x_pos, y_pos, anchor='nw', image=self.IMG_LTPAWN)
-                elif self.board[ind] == constantss.DKPAWN:
-                    self.canvas.create_image(
-                        x_pos, y_pos, anchor='nw', image=self.IMG_DKPAWN)
-                elif self.board[ind] == constantss.LTROOK:
-                    self.canvas.create_image(
-                        x_pos, y_pos, anchor='nw', image=self.IMG_LTROOK)
-                elif self.board[ind] == constantss.DKROOK:
-                    self.canvas.create_image(
-                        x_pos, y_pos, anchor='nw', image=self.IMG_DKROOK)
-                elif self.board[ind] == constantss.LTKING:
-                    self.canvas.create_image(
-                        x_pos, y_pos, anchor='nw', image=self.IMG_LTKING)
-                elif self.board[ind] == constantss.DKKING:
-                    self.canvas.create_image(
-                        x_pos, y_pos, anchor='nw', image=self.IMG_DKKING)
-                elif self.board[ind] == constantss.LTBISHOP:
-                    self.canvas.create_image(
-                        x_pos, y_pos, anchor='nw', image=self.IMG_LTBISHOP)
-                elif self.board[ind] == constantss.DKBISHOP:
-                    self.canvas.create_image(
-                        x_pos, y_pos, anchor='nw', image=self.IMG_DKBISHOP)
-                elif self.board[ind] == constantss.LTQUEEN:
-                    self.canvas.create_image(
-                        x_pos, y_pos, anchor='nw', image=self.IMG_LTQUEEN)
-                elif self.board[ind] == constantss.DKQUEEN:
-                    self.canvas.create_image(
-                        x_pos, y_pos, anchor='nw', image=self.IMG_DKQUEEN)
-                elif self.board[ind] == constantss.LTKNIGHT:
-                    self.canvas.create_image(
-                        x_pos, y_pos, anchor='nw', image=self.IMG_LTKNIGHT)
-                elif self.board[ind] == constantss.DKKNIGHT:
-                    self.canvas.create_image(
-                        x_pos, y_pos, anchor='nw', image=self.IMG_DKKNIGHT)
-                else:
-                    print(
-                        "[ERROR] ChessGui.draw_pieces(): board[ind] value matches no piece!")
+                self.draw_figure(ind, x_pos, y_pos)
 
                 x_pos += constantss.SQUARE_SIZE
             # End inner for loop

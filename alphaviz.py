@@ -85,12 +85,10 @@ class ChessGui(tk.Frame):
         # Creates the input box for a FEN string using Entry
         self.fen_string = tk.Entry(self.statusbar)
         self.fen_string.pack(side=tk.LEFT, in_=self.statusbar)
-        # uses partial from functools to help call load_fen with arguments from the button
-        input_fen_string = partial(self.load_fen, self.fen_string.get())
 
         # Creates the load fen button and link to the load_fen(fen_string) function
         self.button_fen = tk.Button(text='Load Fen String',
-                                    command=input_fen_string)
+                                    command=self.input_fen)
         self.button_fen.pack(side=tk.LEFT, in_=self.statusbar)
         self.statusbar.pack(expand=False, fill="x", side='bottom')
 
@@ -338,6 +336,19 @@ class ChessGui(tk.Frame):
         self.possible_enpassant = '-'   # Not yet implemented in load_fen()
         self.half_moves = 0             # Not yet implemented in load_fen()
         self.full_moves = 1             # Not yet implemented in load_fen()
+
+    def input_fen(self):
+        if DEBUG:
+            print('ChessGui.input_fen() executing...')
+        # uses partial from functools to help call load_fen with arguments from the button
+        fen_input = self.fen_string.get()
+        if DEBUG:
+            print(f'Loading the following FEN string: {fen_input}')
+        
+        self.canvas.delete('all')
+        self.draw_board()
+        self.load_fen(fen_input)
+        self.draw_pieces()
 
     def immortal(self):
         if DEBUG:

@@ -217,27 +217,11 @@ class ChessGui(tk.Frame):
             if DEBUG:
                 print(f'{fen_string} is NOT a valid FEN string!')
                 print('[ERROR] load_fen() Failed.')
+        self.refresh()
 
     def board_to_fen(self):
         if DEBUG:
             print('ChessGui.board_to_fen() executing...')
-
-    def click(self, event):
-        x_pix = event.x - constantss.BOARD_OFFSET
-        y_pix = constantss.BOARD_SIZE - constantss.BOARD_OFFSET - event.y
-        if DEBUG:
-            print(
-                f'ChessGui.click() executing... at ({x_pix},{y_pix})')
-        # if self.highlighted_rect != None:
-        #     self.canvas.delete(self.highlighted_rect)
-
-        # x_loc, y_loc = event.x_root, event.y_root
-        # x_pos = x_loc - ((x_loc - constantss.BOARD_OFFSET) % constantss.SQUARE_SIZE)
-        # y_pos = (-2 - constantss.SQUARE_SIZE + y_loc - ((y_loc - constantss.BOARD_OFFSET) % constantss.SQUARE_SIZE))
-        # ind = (constantss.BOARD_SIZE - y_pos - constantss.SQUARE_SIZE) // constantss.SQUARE_SIZE * 8
-        # ind += (x_pos - constantss.BOARD_OFFSET) // constantss.SQUARE_SIZE
-        # self.highlighted_rect = self.canvas.create_rectangle(x_pos, y_pos, x_pos + constantss.SQUARE_SIZE, y_pos + constantss.SQUARE_SIZE, outline="#fb0", fill="#fb0")
-        # self.draw_figure(ind, x_pos, y_pos)
 
     # Coordinate transform for (x',y') = (0,0) is the top left corner (entire canvas) to 
     # (x, y) = (0,0) is the bottom left corner(chessboard) is 
@@ -303,6 +287,8 @@ class ChessGui(tk.Frame):
         # NEED TO IMPLEMENT!!
         if DEBUG:
             print('ChessGui.refresh() executing...')
+        self.label_status.configure(text="   White to move  " if self.whitetomove else "   Black to move  ")
+        self.label_status.update()
 
     def draw_figure(self, ind, x_pos, y_pos):
         # The ordering of these if statements were created in the wee hours

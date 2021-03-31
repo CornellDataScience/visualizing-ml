@@ -4,6 +4,7 @@ FEN_STARTING_POSITION = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 
 FEN_EMPTY = '4k3/8/8/8/8/8/8/4K3 b - - 0 1'
 FEN_1E4 = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1'
 FEN_IMMORTAL_GAME = 'r1bk2nr/p2p1pNp/n2B1Q2/1p1NP2P/6P1/3P4/P1P1K3/q5b1 w - - 0 1'
+FEN_ALPHASTOCKFISH7 = '4r3/1b2n1pk/1p1r1p2/pP1p1Pn1/P1pP1NPp/2N1P2P/2R3B1/5RK1 b - - 0 1'
 
 
 BOARD_SIZE = 700 # pixel width and height of chessboard.png

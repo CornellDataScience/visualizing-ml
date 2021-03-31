@@ -82,7 +82,7 @@ class ChessGui(tk.Frame):
         # self.button_immortal.pack(side=tk.LEFT, in_=self.statusbar)
 
         # Creates the input box for a FEN string using Entry
-        self.fen_string = tk.Entry(self.statusbar)
+        self.fen_string = tk.Entry(self.statusbar, exportselection=0, width=80)
         self.fen_string.pack(side=tk.LEFT, in_=self.statusbar)
 
         # Creates the load fen button and link to the load_fen(fen_string) function
@@ -217,7 +217,7 @@ class ChessGui(tk.Frame):
             if DEBUG:
                 print(f'{fen_string} is NOT a valid FEN string!')
                 print('[ERROR] load_fen() Failed.')
-        self.refresh()
+        self.label_status.configure(text="   White to move  " if self.whitetomove else "   Black to move  ")
 
     def board_to_fen(self):
         if DEBUG:
@@ -287,8 +287,6 @@ class ChessGui(tk.Frame):
         # NEED TO IMPLEMENT!!
         if DEBUG:
             print('ChessGui.refresh() executing...')
-        self.label_status.configure(text="   White to move  " if self.whitetomove else "   Black to move  ")
-        self.label_status.update()
 
     def draw_figure(self, ind, x_pos, y_pos):
         # The ordering of these if statements were created in the wee hours

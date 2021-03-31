@@ -1,3 +1,4 @@
+from tkinter import constants
 from typing import cast
 import constantss
 import validateFEN
@@ -9,7 +10,7 @@ from functools import partial
 
 DEBUG = True
 CORN = False
-
+global double_click_flag
 
 class ChessGui(tk.Frame):
 
@@ -20,6 +21,9 @@ class ChessGui(tk.Frame):
         if DEBUG:
             print("DEBUG MODE: ON")
             print("ChessGui.__init__() executing...")
+
+        global double_click_flag
+        double_click_flag = False
 
         # GUI display variables
         self.selected = None  # selected square
@@ -55,7 +59,8 @@ class ChessGui(tk.Frame):
         # Directs configuration event of the canvas to call self.refresh()
         self.canvas.bind("<Configure>", self.refresh)
         # Directs left mouse click event to call self.click()
-        self.canvas.bind("<Button-1>", self.click)
+        self.canvas.bind("<Button-1>", self.left_click)
+        self.canvas.bind("<Button-3>", self.right_click)
 
         # Create GUI frame at the bottom of the root frame,
         # below the chessboard canvas
@@ -71,16 +76,10 @@ class ChessGui(tk.Frame):
             self.statusbar, text="CLEAR", fg="black", command=self.clear_board)
         self.button_save.pack(side=tk.LEFT, in_=self.statusbar)
 
-        # [TEMPORARY DEMO FEATURE]
-        self.button_immortal = tk.Button(
-            self.statusbar, text='IMMORTAL', fg="black", command=self.immortal)
-        self.button_immortal.pack(side=tk.LEFT, in_=self.statusbar)
-
-        # Create the quit button and link it to self.parent.destroy() function
-        self.button_quit = tk.Button(
-            self.statusbar, text="Quit", fg="black", command=self.exit)
-        self.button_quit.pack(side=tk.RIGHT, in_=self.statusbar)
-        self.statusbar.pack(expand=False, fill="x", side='bottom')
+        # # [TEMPORARY DEMO FEATURE]
+        # self.button_immortal = tk.Button(
+        #     self.statusbar, text='IMMORTAL', fg="black", command=self.immortal)
+        # self.button_immortal.pack(side=tk.LEFT, in_=self.statusbar)
 
         # Creates the input box for a FEN string using Entry
         self.fen_string = tk.Entry(self.statusbar)
@@ -97,6 +96,14 @@ class ChessGui(tk.Frame):
                                      text="   White to move  " if self.whitetomove else "   Black to move  ",
                                      fg="black")
         self.label_status.pack(side=tk.LEFT, expand=0, in_=self.statusbar)
+
+        # Create the quit button and link it to self.parent.destroy() function
+        self.button_quit = tk.Button(
+            self.statusbar, text="Quit", fg="black", command=self.exit)
+        self.button_quit.pack(side=tk.RIGHT, in_=self.statusbar)
+        self.statusbar.pack(expand=False, fill="x", side='bottom')
+
+        self.reset()
 
     def load_images(self):
         self.IMG_CHESSBOARD = ImageTk.PhotoImage(
@@ -115,6 +122,11 @@ class ChessGui(tk.Frame):
             file=constantss.PATH_DKUNICORN if CORN else constantss.PATH_DKKNIGHT)
         self.IMG_LTPAWN = ImageTk.PhotoImage(file=constantss.PATH_LTPAWN)
         self.IMG_DKPAWN = ImageTk.PhotoImage(file=constantss.PATH_DKPAWN)
+        self.IMG_AQUA_HIGHLIGHT = ImageTk.PhotoImage(file=constantss.PATH_AQUA_HIGHLIGHT)
+        self.IMG_GREEN_HIGHLIGHT = ImageTk.PhotoImage(file=constantss.PATH_GREEN_HIGHLIGHT)
+        self.IMG_RED_HIGHLIGHT = ImageTk.PhotoImage(file=constantss.PATH_RED_HIGHLIGHT)
+        self.IMG_YELLOW_HIGHLIGHT = ImageTk.PhotoImage(file=constantss.PATH_YELLOW_HIGHLIGHT)
+        self.IMG_MAGENTA_HIGHLIGHT = ImageTk.PhotoImage(file=constantss.PATH_MAGENTA_HIGHLIGHT)
 
     def load_fen(self, fen_string):
         if DEBUG:
@@ -211,31 +223,73 @@ class ChessGui(tk.Frame):
             print('ChessGui.board_to_fen() executing...')
 
     def click(self, event):
+        x_pix = event.x - constantss.BOARD_OFFSET
+        y_pix = constantss.BOARD_SIZE - constantss.BOARD_OFFSET - event.y
         if DEBUG:
             print(
-                f'ChessGui.click() executing... at ({event.x_root},{event.y_root})')
-        if self.highlighted_rect != None:
-            self.canvas.delete(self.highlighted_rect)
+                f'ChessGui.click() executing... at ({x_pix},{y_pix})')
+        # if self.highlighted_rect != None:
+        #     self.canvas.delete(self.highlighted_rect)
 
-        x_loc, y_loc = event.x_root, event.y_root
-        x_pos = x_loc - ((x_loc - constantss.BOARD_OFFSET) %
-                         constantss.SQUARE_SIZE)
-        y_pos = (-2 - constantss.SQUARE_SIZE + y_loc -
-                 ((y_loc - constantss.BOARD_OFFSET) % constantss.SQUARE_SIZE))
-        ind = (constantss.BOARD_SIZE - y_pos -
-               constantss.SQUARE_SIZE) // constantss.SQUARE_SIZE * 8
-        ind += (x_pos - constantss.BOARD_OFFSET) // constantss.SQUARE_SIZE
-        self.highlighted_rect = self.canvas.create_rectangle(x_pos, y_pos, x_pos + constantss.SQUARE_SIZE, y_pos + constantss.SQUARE_SIZE,
-                                                             outline="#fb0", fill="#fb0")
-        self.draw_figure(ind, x_pos, y_pos)
+        # x_loc, y_loc = event.x_root, event.y_root
+        # x_pos = x_loc - ((x_loc - constantss.BOARD_OFFSET) % constantss.SQUARE_SIZE)
+        # y_pos = (-2 - constantss.SQUARE_SIZE + y_loc - ((y_loc - constantss.BOARD_OFFSET) % constantss.SQUARE_SIZE))
+        # ind = (constantss.BOARD_SIZE - y_pos - constantss.SQUARE_SIZE) // constantss.SQUARE_SIZE * 8
+        # ind += (x_pos - constantss.BOARD_OFFSET) // constantss.SQUARE_SIZE
+        # self.highlighted_rect = self.canvas.create_rectangle(x_pos, y_pos, x_pos + constantss.SQUARE_SIZE, y_pos + constantss.SQUARE_SIZE, outline="#fb0", fill="#fb0")
+        # self.draw_figure(ind, x_pos, y_pos)
+
+    # Coordinate transform for (x',y') = (0,0) is the top left corner (entire canvas) to 
+    # (x, y) = (0,0) is the bottom left corner(chessboard) is 
+    # (x = x' - 30,y = 700 - 30 - y')
+    def left_click(self, event):
+        x_pix = event.x - constantss.BOARD_OFFSET #[-30, 670] left to right
+        y_pix = constantss.BOARD_SIZE - constantss.BOARD_OFFSET - event.y #[-30, 670] bottom to top
+        if DEBUG:
+            print(f'left_click() at ({x_pix},{y_pix})')
+
+    def right_click(self, event):
+        x_pix = event.x - constantss.BOARD_OFFSET #[-30, 670] left to right
+        y_pix = constantss.BOARD_SIZE - constantss.BOARD_OFFSET - event.y #[-30, 670] bottom to top
+        if DEBUG:
+            print(f'right_click() at ({x_pix},{y_pix})')
+
+        # Do nothing if the click occurred outside of board region.
+        if (x_pix > (constantss.BOARD_SIZE - 2*constantss.BOARD_OFFSET)) or (y_pix > (constantss.BOARD_SIZE -2*constantss.BOARD_OFFSET)) or (x_pix < 0) or (y_pix < 0):
+            return
+
+        #0 through 7
+        x_square = int(x_pix / constantss.SQUARE_SIZE)
+        y_square = int(y_pix / constantss.SQUARE_SIZE)
+        square = y_square*8 + x_square
+        self.highlight(square)
 
     def move(self, p1, p2):
         if DEBUG:
             print('ChessGui.move() executing...')
 
-    def highlight(self, pos):
+    # Highlights the square at the event.x, event.y
+    def highlight(self, sq):
         if DEBUG:
-            print('ChessGui.highlight() executing...')
+            print(f'ChessGui.highlight() executing on square {sq}...')
+        if(self.highlight_rect == sq):
+            self.highlight_rect = None
+            self.canvas.delete('all')
+            self.draw_board()
+            self.draw_pieces()
+        else:
+            self.highlight_rect = sq
+            x_pix = int(sq % 8) * constantss.SQUARE_SIZE
+            y_pix = int(sq / 8) * constantss.SQUARE_SIZE
+            # Coordinate transfrom (x', y') = (0,0) is lower left (with margin) to 
+            # (x,y) = (0,0) is upper left without margin. (x = x' + 30, y = 700 - 30 - 80 - y' - 1)
+            x_pos = x_pix + constantss.BOARD_OFFSET
+            y_pos = constantss.BOARD_SIZE - constantss.BOARD_OFFSET - y_pix - constantss.SQUARE_SIZE - 1
+
+            self.canvas.delete('all')
+            self.draw_board()
+            self.canvas.create_image(x_pos, y_pos, anchor='nw', image=self.IMG_RED_HIGHLIGHT)
+            self.draw_pieces()
 
     def addpiece(self, name, image, row=0, column=0):
         if DEBUG:
@@ -345,18 +399,21 @@ class ChessGui(tk.Frame):
         if DEBUG:
             print(f'Loading the following FEN string: {fen_input}')
         
-        self.canvas.delete('all')
-        self.draw_board()
-        self.load_fen(fen_input)
-        self.draw_pieces()
+        if(validateFEN.fenPass(fen_input)):
+            self.canvas.delete('all')
+            self.draw_board()
+            self.load_fen(fen_input)
+            self.draw_pieces()
+        else:
+            print(f'[ERROR] ChessGui.input_fen() failed to execute on "{fen_input}"')
 
-    def immortal(self):
-        if DEBUG:
-            print('ChessGui.immortal() executing...')
-        self.canvas.delete('all')
-        self.draw_board()
-        self.load_fen(constantss.FEN_IMMORTAL_GAME)
-        self.draw_pieces()
+    # def immortal(self):
+    #     if DEBUG:
+    #         print('ChessGui.immortal() executing...')
+    #     self.canvas.delete('all')
+    #     self.draw_board()
+    #     self.load_fen(constantss.FEN_IMMORTAL_GAME)
+    #     self.draw_pieces()
 
     def clear_board(self):
         if DEBUG:

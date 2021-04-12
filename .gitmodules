@@ -1,0 +1,3 @@
+[submodule "chess-alpha-zero"]
+	path = chess-alpha-zero
+	url = https://github.com/pianpwk/chess-alpha-zero.git

@@ -12,6 +12,14 @@ DEBUG = True
 CORN = False
 global double_click_flag
 
+global arrow
+global draw_arrow
+global first_x
+global first_y
+arrow = False
+draw_arrow = False
+
+
 class ChessGui(tk.Frame):
 
     # Initializes the AlphaViz GUI
@@ -103,6 +111,12 @@ class ChessGui(tk.Frame):
         self.button_quit.pack(side=tk.RIGHT, in_=self.statusbar)
         self.statusbar.pack(expand=False, fill="x", side='bottom')
 
+        # Creates the button for activating drawing arrows
+        self.button_arrow = tk.Button(text='Draw Arrow',
+                                      command=self.activate_arrow)
+        self.button_arrow.pack(side=tk.RIGHT, in_=self.statusbar)
+        self.statusbar.pack(expand=False, fill="x", side='bottom')
+
         self.reset()
 
     def load_images(self):
@@ -122,11 +136,22 @@ class ChessGui(tk.Frame):
             file=constantss.PATH_DKUNICORN if CORN else constantss.PATH_DKKNIGHT)
         self.IMG_LTPAWN = ImageTk.PhotoImage(file=constantss.PATH_LTPAWN)
         self.IMG_DKPAWN = ImageTk.PhotoImage(file=constantss.PATH_DKPAWN)
-        self.IMG_AQUA_HIGHLIGHT = ImageTk.PhotoImage(file=constantss.PATH_AQUA_HIGHLIGHT)
-        self.IMG_GREEN_HIGHLIGHT = ImageTk.PhotoImage(file=constantss.PATH_GREEN_HIGHLIGHT)
-        self.IMG_RED_HIGHLIGHT = ImageTk.PhotoImage(file=constantss.PATH_RED_HIGHLIGHT)
-        self.IMG_YELLOW_HIGHLIGHT = ImageTk.PhotoImage(file=constantss.PATH_YELLOW_HIGHLIGHT)
-        self.IMG_MAGENTA_HIGHLIGHT = ImageTk.PhotoImage(file=constantss.PATH_MAGENTA_HIGHLIGHT)
+        self.IMG_AQUA_HIGHLIGHT = ImageTk.PhotoImage(
+            file=constantss.PATH_AQUA_HIGHLIGHT)
+        self.IMG_GREEN_HIGHLIGHT = ImageTk.PhotoImage(
+            file=constantss.PATH_GREEN_HIGHLIGHT)
+        self.IMG_RED_HIGHLIGHT = ImageTk.PhotoImage(
+            file=constantss.PATH_RED_HIGHLIGHT)
+        self.IMG_YELLOW_HIGHLIGHT = ImageTk.PhotoImage(
+            file=constantss.PATH_YELLOW_HIGHLIGHT)
+        self.IMG_MAGENTA_HIGHLIGHT = ImageTk.PhotoImage(
+            file=constantss.PATH_MAGENTA_HIGHLIGHT)
+
+    def activate_arrow(self):
+        if DEBUG:
+            print(f'ChessGui.activate_arrow() executing...')
+        global arrow
+        arrow = True
 
     def load_fen(self, fen_string):
         if DEBUG:
@@ -217,32 +242,57 @@ class ChessGui(tk.Frame):
             if DEBUG:
                 print(f'{fen_string} is NOT a valid FEN string!')
                 print('[ERROR] load_fen() Failed.')
-        self.label_status.configure(text="   White to move  " if self.whitetomove else "   Black to move  ")
+        self.label_status.configure(
+            text="   White to move  " if self.whitetomove else "   Black to move  ")
 
     def board_to_fen(self):
         if DEBUG:
             print('ChessGui.board_to_fen() executing...')
 
-    # Coordinate transform for (x',y') = (0,0) is the top left corner (entire canvas) to 
-    # (x, y) = (0,0) is the bottom left corner(chessboard) is 
+    def start_arrow(self, first_x, first_y, second_x, second_y):
+        self.canvas.create_line(first_x, first_y,
+                                second_x, second_y, fill='blue', width=10, arrow=tk.LAST)
+        global arrow
+        global draw_arrow
+        arrow = False
+        draw_arrow = False
+
+    # Coordinate transform for (x',y') = (0,0) is the top left corner (entire canvas) to
+    # (x, y) = (0,0) is the bottom left corner(chessboard) is
     # (x = x' - 30,y = 700 - 30 - y')
+
     def left_click(self, event):
-        x_pix = event.x - constantss.BOARD_OFFSET #[-30, 670] left to right
-        y_pix = constantss.BOARD_SIZE - constantss.BOARD_OFFSET - event.y #[-30, 670] bottom to top
+        global draw_arrow
+        global first_x
+        global first_y
+        global arrow
+        x_pix = event.x - constantss.BOARD_OFFSET  # [-30, 670] left to right
+        y_pix = constantss.BOARD_SIZE - constantss.BOARD_OFFSET - \
+            event.y  # [-30, 670] bottom to top
+        if arrow:
+            print("hello")
+            draw_arrow = True
+            first_x = event.x
+            first_y = event.y
+            arrow = False
+        elif draw_arrow:
+            print("hello2")
+            self.start_arrow(first_x, first_y, event.x, event.y)
         if DEBUG:
             print(f'left_click() at ({x_pix},{y_pix})')
 
     def right_click(self, event):
-        x_pix = event.x - constantss.BOARD_OFFSET #[-30, 670] left to right
-        y_pix = constantss.BOARD_SIZE - constantss.BOARD_OFFSET - event.y #[-30, 670] bottom to top
+        x_pix = event.x - constantss.BOARD_OFFSET  # [-30, 670] left to right
+        y_pix = constantss.BOARD_SIZE - constantss.BOARD_OFFSET - \
+            event.y  # [-30, 670] bottom to top
         if DEBUG:
             print(f'right_click() at ({x_pix},{y_pix})')
 
         # Do nothing if the click occurred outside of board region.
-        if (x_pix > (constantss.BOARD_SIZE - 2*constantss.BOARD_OFFSET)) or (y_pix > (constantss.BOARD_SIZE -2*constantss.BOARD_OFFSET)) or (x_pix < 0) or (y_pix < 0):
+        if (x_pix > (constantss.BOARD_SIZE - 2*constantss.BOARD_OFFSET)) or (y_pix > (constantss.BOARD_SIZE - 2*constantss.BOARD_OFFSET)) or (x_pix < 0) or (y_pix < 0):
             return
 
-        #0 through 7
+        # 0 through 7
         x_square = int(x_pix / constantss.SQUARE_SIZE)
         y_square = int(y_pix / constantss.SQUARE_SIZE)
         square = y_square*8 + x_square
@@ -252,7 +302,8 @@ class ChessGui(tk.Frame):
         if DEBUG:
             print('ChessGui.move() executing...')
 
-    # Highlights the square at the event.x, event.y
+        # Highlights the square at the event.x, event.y
+
     def highlight(self, sq):
         if DEBUG:
             print(f'ChessGui.highlight() executing on square {sq}...')
@@ -265,14 +316,16 @@ class ChessGui(tk.Frame):
             self.highlight_rect = sq
             x_pix = int(sq % 8) * constantss.SQUARE_SIZE
             y_pix = int(sq / 8) * constantss.SQUARE_SIZE
-            # Coordinate transfrom (x', y') = (0,0) is lower left (with margin) to 
+            # Coordinate transfrom (x', y') = (0,0) is lower left (with margin) to
             # (x,y) = (0,0) is upper left without margin. (x = x' + 30, y = 700 - 30 - 80 - y' - 1)
             x_pos = x_pix + constantss.BOARD_OFFSET
-            y_pos = constantss.BOARD_SIZE - constantss.BOARD_OFFSET - y_pix - constantss.SQUARE_SIZE - 1
+            y_pos = constantss.BOARD_SIZE - constantss.BOARD_OFFSET - \
+                y_pix - constantss.SQUARE_SIZE - 1
 
             self.canvas.delete('all')
             self.draw_board()
-            self.canvas.create_image(x_pos, y_pos, anchor='nw', image=self.IMG_RED_HIGHLIGHT)
+            self.canvas.create_image(
+                x_pos, y_pos, anchor='nw', image=self.IMG_RED_HIGHLIGHT)
             self.draw_pieces()
 
     def addpiece(self, name, image, row=0, column=0):
@@ -382,14 +435,15 @@ class ChessGui(tk.Frame):
         fen_input = self.fen_string.get()
         if DEBUG:
             print(f'Loading the following FEN string: {fen_input}')
-        
+
         if(validateFEN.fenPass(fen_input)):
             self.canvas.delete('all')
             self.draw_board()
             self.load_fen(fen_input)
             self.draw_pieces()
         else:
-            print(f'[ERROR] ChessGui.input_fen() failed to execute on "{fen_input}"')
+            print(
+                f'[ERROR] ChessGui.input_fen() failed to execute on "{fen_input}"')
 
     # def immortal(self):
     #     if DEBUG:

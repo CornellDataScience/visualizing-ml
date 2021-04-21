@@ -7,6 +7,8 @@ from PIL import Image, ImageTk
 import re
 from tkinter import *
 from functools import partial
+# TODO: uncomment
+# from ai.chess_ai import *
 
 DEBUG = True
 CORN = False
@@ -68,7 +70,7 @@ class ChessGui(tk.Frame):
         self.canvas.bind("<Configure>", self.refresh)
         # Directs left mouse click event to call self.click()
         self.canvas.bind("<Button-1>", self.left_click)
-        self.canvas.bind("<Button-3>", self.right_click)
+        self.canvas.bind("<Button-2>", self.right_click)
 
         # Create GUI frame at the bottom of the root frame,
         # below the chessboard canvas
@@ -297,6 +299,61 @@ class ChessGui(tk.Frame):
         y_square = int(y_pix / constantss.SQUARE_SIZE)
         square = y_square*8 + x_square
         self.highlight(square)
+        print(self.letters_from_square(square))
+
+        if self.board[square] >= 7:
+            # Then black piece, i.e. AI
+            # TODO: Display all possible moves from the AI
+            self.highlight(square,color="blue")
+        elif self.board[square] >= 1:
+            # Then white piece, i.e. human player
+            # TODO: display all moves
+            self.display_moves(square)
+
+    def display_moves(self, square):
+        letters = self.letters_from_square(square)
+        fen = self.fen_string.get()
+        for i in range(8):
+            for j in range(8):
+                to_square = i * 8 + j
+                piece = self.board[to_square]
+                if piece >= 1 and piece <= 7:
+                    # Then white, so we can't move there
+                    continue
+                to_letters = self.letters_from_square(square)
+                # TODO: fix errors then uncomment below
+                if valid_move(fen, letters + to_letters):
+                    self.highlight(to_square, "blue")
+
+
+    # Returns letters of the square, e.g. "e1"
+    def letters_from_square(self, square):
+        x_sq = square % 8
+        y_sq = 1 + int(square / 8)
+        return "abcdefgh"[x_sq] + str(y_sq)
+
+    # Returns top left coordinates of square
+    def coord_from_square(self, square):
+        x_sq = square % 8
+        y_sq = 1 + int(square / 8)
+        x_pix = constantss.BOARD_OFFSET + x_sq * constantss.SQUARE_SIZE
+        y_pix = constantss.BOARD_OFFSET + y_sq * constantss.SQUARE_SIZE
+        return x_pix, y_pix
+
+    # Returns square from coordinates
+    def square_from_coord(self, x, y):
+        x_pix = x - constantss.BOARD_OFFSET  # [-30, 670] left to right
+        y_pix = constantss.BOARD_SIZE - constantss.BOARD_OFFSET - \
+                y  # [-30, 670] bottom to top
+        # Do nothing if the click occurred outside of board region.
+        if (x_pix > (constantss.BOARD_SIZE - 2 * constantss.BOARD_OFFSET)) or (
+                y_pix > (constantss.BOARD_SIZE - 2 * constantss.BOARD_OFFSET)) or (x_pix < 0) or (y_pix < 0):
+            return -1
+
+        # 0 through 7
+        x_square = int(x_pix / constantss.SQUARE_SIZE)
+        y_square = int(y_pix / constantss.SQUARE_SIZE)
+        square = y_square * 8 + x_square
 
     def move(self, p1, p2):
         if DEBUG:
@@ -304,7 +361,7 @@ class ChessGui(tk.Frame):
 
         # Highlights the square at the event.x, event.y
 
-    def highlight(self, sq):
+    def highlight(self, sq, color="red"):
         if DEBUG:
             print(f'ChessGui.highlight() executing on square {sq}...')
         if(self.highlight_rect == sq):
@@ -324,8 +381,11 @@ class ChessGui(tk.Frame):
 
             self.canvas.delete('all')
             self.draw_board()
+            color_img = self.IMG_RED_HIGHLIGHT
+            if color == "blue":
+                color_img = self.IMG_AQuA_HIGHLIGHT
             self.canvas.create_image(
-                x_pos, y_pos, anchor='nw', image=self.IMG_RED_HIGHLIGHT)
+                x_pos, y_pos, anchor='nw', image=color_img)
             self.draw_pieces()
 
     def addpiece(self, name, image, row=0, column=0):

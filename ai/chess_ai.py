@@ -33,6 +33,20 @@ def get_chess_player(
     )
 
 '''
+Brute force approach to validating move
+Format:
+<fen>: fen string
+<move>: <position1><position2>, e.g. c2c4
+'''
+def valid_move(fen, move):
+    board = chess.Board(fen)
+    try:
+        board.push_uci(move)
+    except ValueError as e:
+        return False
+    return True
+
+'''
 Switches the move from w->b or b->w
 '''
 def reverse_move(move):

@@ -18,6 +18,15 @@ global arrow
 global draw_arrow
 global first_x
 global first_y
+global converted_x
+converted_x = 200
+global converted_x2
+converted_x2 = 300
+global converted_y
+converted_y = 200
+global converted_y2
+converted_y2 = 300
+
 arrow = False
 draw_arrow = False
 
@@ -114,9 +123,14 @@ class ChessGui(tk.Frame):
         self.statusbar.pack(expand=False, fill="x", side='bottom')
 
         # Creates the button for activating drawing arrows
-        self.button_arrow = tk.Button(text='Draw Arrow',
+        self.button_arrow = tk.Button(text='Draw Arrows',
                                       command=self.activate_arrow)
         self.button_arrow.pack(side=tk.RIGHT, in_=self.statusbar)
+        self.statusbar.pack(expand=False, fill="x", side='bottom')
+
+        self.button_best_move = tk.Button(text='Show Best Move',
+                                          command=self.draw_AI_arrow)
+        self.button_best_move.pack(side=tk.RIGHT, in_=self.statusbar)
         self.statusbar.pack(expand=False, fill="x", side='bottom')
 
         self.reset()
@@ -263,6 +277,14 @@ class ChessGui(tk.Frame):
     # (x, y) = (0,0) is the bottom left corner(chessboard) is
     # (x = x' - 30,y = 700 - 30 - y')
 
+    def draw_AI_arrow(self):
+        global converted_x
+        global converted_x2
+        global converted_y
+        global converted_y2
+        print("hello!")
+        self.start_arrow(converted_x, converted_y, converted_x2, converted_y2)
+
     def left_click(self, event):
         global draw_arrow
         global first_x
@@ -304,7 +326,7 @@ class ChessGui(tk.Frame):
         if self.board[square] >= 7:
             # Then black piece, i.e. AI
             # TODO: Display all possible moves from the AI
-            self.highlight(square,color="blue")
+            self.highlight(square, color="blue")
         elif self.board[square] >= 1:
             # Then white piece, i.e. human player
             # TODO: display all moves
@@ -325,8 +347,8 @@ class ChessGui(tk.Frame):
                 if valid_move(fen, letters + to_letters):
                     self.highlight(to_square, "blue")
 
-
     # Returns letters of the square, e.g. "e1"
+
     def letters_from_square(self, square):
         x_sq = square % 8
         y_sq = 1 + int(square / 8)
@@ -344,7 +366,7 @@ class ChessGui(tk.Frame):
     def square_from_coord(self, x, y):
         x_pix = x - constantss.BOARD_OFFSET  # [-30, 670] left to right
         y_pix = constantss.BOARD_SIZE - constantss.BOARD_OFFSET - \
-                y  # [-30, 670] bottom to top
+            y  # [-30, 670] bottom to top
         # Do nothing if the click occurred outside of board region.
         if (x_pix > (constantss.BOARD_SIZE - 2 * constantss.BOARD_OFFSET)) or (
                 y_pix > (constantss.BOARD_SIZE - 2 * constantss.BOARD_OFFSET)) or (x_pix < 0) or (y_pix < 0):

@@ -50,11 +50,13 @@ PATH_DKPAWN = r'imgs/pawn_dark.png'
 PATH_LTUNICORN = r'imgs/unicorn_light.png'
 PATH_DKUNICORN = r'imgs/unicorn_dark.png'
 
-PATH_AQUA_HIGHLIGHT = r'imgs/aqua_highlight.png'
-PATH_GREEN_HIGHLIGHT = r'imgs/green_highlight.png'
-PATH_RED_HIGHLIGHT = r'imgs/red_highlight.png'
-PATH_YELLOW_HIGHLIGHT = r'imgs/yellow_highlight.png'
-PATH_MAGENTA_HIGHLIGHT = r'imgs/magenta_highlight.png'
+# Source: https://www.color-hex.com/color-palette/94102
+MONOKAI_RED = (255,97,136)
+MONOKAI_ORANGE = (252,152,103)
+MONOKAI_YELLOW = (255,216,102)
+MONOKAI_GREEN = (169,220,118)
+MONOKAI_BLUE = (120,220,232)
+MONOKAI_PURPLE = (174,129,255)
 
 
 # RANDOM FEN STRINGS FOR TESTING:

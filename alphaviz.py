@@ -3,7 +3,9 @@ from typing import cast
 import constantss
 import validateFEN
 import tkinter as tk
-from PIL import Image, ImageTk
+from PIL import ImageTk
+import PIL.Image
+# import PIL.ImageTk
 import re
 from tkinter import *
 from functools import partial
@@ -38,8 +40,8 @@ class ChessGui(tk.Frame):
         # GUI display variables
         self.selected = None  # selected square
         self.selected_piece = None
-        self.highlighted = None
-        self.highlight_rect = None  # reference to the previous rectangle that
+        self.highlighted_imgs = []
+        self.highlighted_rects = []  # reference to all highlighted squares
 
         # Set parent GUI element (most likely root)
         self.parent = parent
@@ -138,16 +140,6 @@ class ChessGui(tk.Frame):
             file=constantss.PATH_DKUNICORN if CORN else constantss.PATH_DKKNIGHT)
         self.IMG_LTPAWN = ImageTk.PhotoImage(file=constantss.PATH_LTPAWN)
         self.IMG_DKPAWN = ImageTk.PhotoImage(file=constantss.PATH_DKPAWN)
-        self.IMG_AQUA_HIGHLIGHT = ImageTk.PhotoImage(
-            file=constantss.PATH_AQUA_HIGHLIGHT)
-        self.IMG_GREEN_HIGHLIGHT = ImageTk.PhotoImage(
-            file=constantss.PATH_GREEN_HIGHLIGHT)
-        self.IMG_RED_HIGHLIGHT = ImageTk.PhotoImage(
-            file=constantss.PATH_RED_HIGHLIGHT)
-        self.IMG_YELLOW_HIGHLIGHT = ImageTk.PhotoImage(
-            file=constantss.PATH_YELLOW_HIGHLIGHT)
-        self.IMG_MAGENTA_HIGHLIGHT = ImageTk.PhotoImage(
-            file=constantss.PATH_MAGENTA_HIGHLIGHT)
 
     def activate_arrow(self):
         if DEBUG:
@@ -298,16 +290,16 @@ class ChessGui(tk.Frame):
         y_square = int(y_pix / constantss.SQUARE_SIZE)
         square = y_square*8 + x_square
         self.highlight(square)
-        print(self.letters_from_square(square))
 
-        if self.board[square] >= 7:
-            # Then black piece, i.e. AI
-            # TODO: Display all possible moves from the AI
-            self.highlight(square,color="blue")
-        elif self.board[square] >= 1:
-            # Then white piece, i.e. human player
-            # TODO: display all moves
-            self.display_moves(square)
+        # Not sure what this is for yet
+        # if self.board[square] >= 7:
+        #     # Then black piece, i.e. AI
+        #     # TODO: Display all possible moves from the AI
+        #     self.highlight(square,color="blue")
+        # elif self.board[square] >= 1:
+        #     # Then white piece, i.e. human player
+        #     # TODO: display all moves
+        #     self.display_moves(square)
 
     def display_moves(self, square):
         letters = self.letters_from_square(square)
@@ -358,18 +350,13 @@ class ChessGui(tk.Frame):
         if DEBUG:
             print('ChessGui.move() executing...')
 
-        # Highlights the square at the event.x, event.y
 
-    def highlight(self, sq, color="red"):
-        if DEBUG:
-            print(f'ChessGui.highlight() executing on square {sq}...')
-        if(self.highlight_rect == sq):
-            self.highlight_rect = None
-            self.canvas.delete('all')
-            self.draw_board()
-            self.draw_pieces()
-        else:
-            self.highlight_rect = sq
+    def highlight_helper(self):
+        for tup in self.highlighted_rects:
+            sq = tup[0]
+            color = tup[1]
+            alpha = tup[2]
+
             x_pix = int(sq % 8) * constantss.SQUARE_SIZE
             y_pix = int(sq / 8) * constantss.SQUARE_SIZE
             # Coordinate transfrom (x', y') = (0,0) is lower left (with margin) to
@@ -378,13 +365,48 @@ class ChessGui(tk.Frame):
             y_pos = constantss.BOARD_SIZE - constantss.BOARD_OFFSET - \
                 y_pix - constantss.SQUARE_SIZE - 1
 
+            alpha = int(alpha * 255)
+            base = color #If color is a tuple, we will use it directly
+            if(color == 'red'):
+                base = constantss.MONOKAI_RED
+            elif(color == 'orange'):
+                base = constantss.MONOKAI_ORANGE
+            elif(color == 'yellow'):
+                base = constantss.MONOKAI_YELLOW
+            elif(color == 'green'):
+                base = constantss.MONOKAI_GREEN
+            elif(color == 'blue'):
+                base = constantss.MONOKAI_BLUE
+            elif(color == 'purple'):
+                base = constantss.MONOKAI_PURPLE
+            else:
+                print("Possible error in highlight() if color was not a tuple...")
+
+            color = base + (alpha,)
+            image = PIL.Image.new('RGBA', (constantss.SQUARE_SIZE, constantss.SQUARE_SIZE), color)
+            self.highlighted_imgs.append(ImageTk.PhotoImage(image))
+            self.canvas.create_image(x_pos, y_pos, anchor='nw', image=self.highlighted_imgs[-1])
+
+    # Highlights the square at the event.x, event.y
+    def highlight(self, sq, color='purple', alpha=0.65):
+        algsq = self.letters_from_square(sq)
+        if DEBUG:
+            print(f'ChessGui.highlight() on square [{algsq}]...')
+        
+        tup = (sq, color, alpha)
+
+        if(tup in self.highlighted_rects):
+            self.highlighted_rects.remove(tup) 
+                
             self.canvas.delete('all')
             self.draw_board()
-            color_img = self.IMG_RED_HIGHLIGHT
-            if color == "blue":
-                color_img = self.IMG_AQuA_HIGHLIGHT
-            self.canvas.create_image(
-                x_pos, y_pos, anchor='nw', image=color_img)
+            self.highlight_helper()
+            self.draw_pieces()
+        else:
+            self.highlighted_rects.append(tup)
+            self.canvas.delete('all')
+            self.draw_board()
+            self.highlight_helper()
             self.draw_pieces()
 
     def addpiece(self, name, image, row=0, column=0):
@@ -479,13 +501,13 @@ class ChessGui(tk.Frame):
         # initialize empty board. index 0 is A1 and 63 is H8
         self.board = [0]*64
         self.whitetomove = True
-        self.wk_castle = True           # Not yet implemented in load_fen()
-        self.wq_castle = True           # Not yet implemented in load_fen()
-        self.bk_castle = True           # Not yet implemented in load_fen()
-        self.bq_castle = True           # Not yet implemented in load_fen()
-        self.possible_enpassant = '-'   # Not yet implemented in load_fen()
-        self.half_moves = 0             # Not yet implemented in load_fen()
-        self.full_moves = 1             # Not yet implemented in load_fen()
+        self.wk_castle = True
+        self.wq_castle = True
+        self.bk_castle = True
+        self.bq_castle = True
+        self.possible_enpassant = '-'
+        self.half_moves = 0
+        self.full_moves = 1
 
     def input_fen(self):
         if DEBUG:
@@ -504,21 +526,14 @@ class ChessGui(tk.Frame):
             print(
                 f'[ERROR] ChessGui.input_fen() failed to execute on "{fen_input}"')
 
-    # def immortal(self):
-    #     if DEBUG:
-    #         print('ChessGui.immortal() executing...')
-    #     self.canvas.delete('all')
-    #     self.draw_board()
-    #     self.load_fen(constantss.FEN_IMMORTAL_GAME)
-    #     self.draw_pieces()
-
     def clear_board(self):
         if DEBUG:
             print('ChessGui.clear_board() executing...')
 
         self.canvas.delete('all')
+        self.highlighted_img = []
+        self.highlighted_rects = []
         self.draw_board()
-        self.load_fen(constantss.FEN_EMPTY)
         self.draw_pieces()
 
     def reset(self):

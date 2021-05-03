@@ -5,7 +5,9 @@ FEN_EMPTY = '4k3/8/8/8/8/8/8/4K3 b - - 0 1'
 FEN_1E4 = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1'
 FEN_IMMORTAL_GAME = 'r1bk2nr/p2p1pNp/n2B1Q2/1p1NP2P/6P1/3P4/P1P1K3/q5b1 w - - 0 1'
 FEN_ALPHASTOCKFISH7 = '4r3/1b2n1pk/1p1r1p2/pP1p1Pn1/P1pP1NPp/2N1P2P/2R3B1/5RK1 b - - 0 1'
-#Source: https://www.youtube.com/watch?v=JacRX6cKIaY, 
+
+# Game: AlphaZero vs Stockfish (1-0) at TCEC 2018
+# Source: https://www.youtube.com/watch?v=JacRX6cKIaY, 
 #        https://chess24.com/en/watch/live-tournaments/alphazero-vs-stockfish/3/1/5
 # Black to move (Move 24. h4... awaiting black's move)
 # Notes: AlphaZero plays e4g5 (Kg5) which 'blunders the knight but is winning long term...

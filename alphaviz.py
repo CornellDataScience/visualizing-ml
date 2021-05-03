@@ -260,8 +260,8 @@ class ChessGui(tk.Frame):
         self.canvas.delete('all')
         self.draw_board()
         self.highlight_helper()
-        self.arrow_helper()
         self.draw_pieces()
+        self.arrow_helper()
 
         global arrow
         global draw_arrow
@@ -418,15 +418,15 @@ class ChessGui(tk.Frame):
             self.canvas.delete('all')
             self.draw_board()
             self.highlight_helper()
-            self.arrow_helper()
             self.draw_pieces()
+            self.arrow_helper()
         else:
             self.highlighted_rects.append(tup)
             self.canvas.delete('all')
             self.draw_board()
             self.highlight_helper()
-            self.arrow_helper()
             self.draw_pieces()
+            self.arrow_helper()
 
     def addpiece(self, name, image, row=0, column=0):
         if DEBUG:

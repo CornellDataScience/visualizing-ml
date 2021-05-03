@@ -70,7 +70,7 @@ class ChessGui(tk.Frame):
         self.canvas.bind("<Configure>", self.refresh)
         # Directs left mouse click event to call self.click()
         self.canvas.bind("<Button-1>", self.left_click)
-        self.canvas.bind("<Button-2>", self.right_click)
+        self.canvas.bind("<Button-3>", self.right_click)
 
         # Create GUI frame at the bottom of the root frame,
         # below the chessboard canvas
@@ -272,21 +272,20 @@ class ChessGui(tk.Frame):
         y_pix = constantss.BOARD_SIZE - constantss.BOARD_OFFSET - \
             event.y  # [-30, 670] bottom to top
         if arrow:
-            print("hello")
+            #print("hello")
             draw_arrow = True
             first_x = event.x
             first_y = event.y
             arrow = False
         elif draw_arrow:
-            print("hello2")
+            #print("hello2")
             self.start_arrow(first_x, first_y, event.x, event.y)
         if DEBUG:
             print(f'left_click() at ({x_pix},{y_pix})')
 
     def right_click(self, event):
         x_pix = event.x - constantss.BOARD_OFFSET  # [-30, 670] left to right
-        y_pix = constantss.BOARD_SIZE - constantss.BOARD_OFFSET - \
-            event.y  # [-30, 670] bottom to top
+        y_pix = constantss.BOARD_SIZE - constantss.BOARD_OFFSET - event.y  # [-30, 670] bottom to top
         if DEBUG:
             print(f'right_click() at ({x_pix},{y_pix})')
 

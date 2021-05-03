@@ -60,7 +60,7 @@ class ChessGui(tk.Frame):
         self.canvas.bind("<Configure>", self.refresh)
         # Directs left mouse click event to call self.click()
         self.canvas.bind("<Button-1>", self.left_click)
-        self.canvas.bind("<Button-3>", self.right_click)
+        self.canvas.bind("<Button-2>", self.right_click)
 
         # Create GUI frame at the bottom of the root frame,
         # below the chessboard canvas

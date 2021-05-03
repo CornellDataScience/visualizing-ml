@@ -13,6 +13,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 from argparse import Namespace
 
+import stockfish
+import collections
+
 def get_chess_player(
     model_json='data/model/model_best_config.json',
     model_h5='data/model/model_best_weight.h5'
@@ -75,8 +78,9 @@ def fen_to_onehot_grid(fen, white=True):
 
 class ChessTreeNode:
     
-    def __init__(self, fen):
+    def __init__(self, fen, player):
         self.fen = fen
+        self.player = player
         self.children = {}
         
     def viz(self):
@@ -92,15 +96,14 @@ class ChessTreeNode:
     Returns the root node of a tree with depth <depth> and branching factor <B>,
     starting at the board state <fen>.
     '''
-    @staticmethod
-    def build_tree(fen, chess_player, B=3, depth=3):
+    def build_tree(self, fen, B=3, depth=3):
         
-        node = ChessTreeNode(fen)
+        node = ChessTreeNode(fen, self.player)
         if depth == 0:
             return node
         
         # get top B moves
-        top_B_moves = ChessTreeNode.predict_top_moves(fen, chess_player, B)
+        top_B_moves = self.predict_top_moves(fen, B)
         
         # traverse tree
         for move,move_p in top_B_moves:
@@ -108,9 +111,8 @@ class ChessTreeNode:
             try:
                 board.push_uci(move)
                 node.children[move] = (
-                    ChessTreeNode.build_tree(
+                    self.build_tree(
                         board.fen(),
-                        chess_player,
                         B=B,
                         depth=depth-1
                     ),
@@ -125,8 +127,7 @@ class ChessTreeNode:
     Given board state <fen> and player model <chess_player>, returns the top <B> moves,
     and their probabilities, ordered from highest to lowest
     '''
-    @staticmethod
-    def predict_top_moves(fen, chess_player, B):
+    def predict_top_moves(self, fen, B):
         
         # by default player predicts for white: flip board if black to move, then reverse moves
         # - probably better way to do this - try to find one later
@@ -136,8 +137,8 @@ class ChessTreeNode:
             
         # get model predictions for each move
         model_input = canon_input_planes(fen)
-        leaf_p, leaf_v = chess_player.predict(model_input) # leaf_p: prob array for each move
-        top_B_moves = [(chess_player.labels[i], leaf_p[i]) for i in np.argsort(-leaf_p)[:B]] # (move, move_prob)
+        leaf_p, leaf_v = self.player.predict(model_input) # leaf_p: prob array for each move
+        top_B_moves = [(self.player.labels[i], leaf_p[i]) for i in np.argsort(-leaf_p)[:B]] # (move, move_prob)
         
         if black_to_move: # reverse moves
             top_B_moves = [(reverse_move(move), move_p) for move,move_p in top_B_moves]
@@ -179,3 +180,30 @@ class ChessTreeNode:
         plt.imshow(total_grid / total_grid.max())
         plt.show()
         return total_grid
+    
+class StockfishTreeNode(ChessTreeNode):
+    
+    '''
+    player: instance of Stockfish object
+    hack_probs: hacky way of getting probabilities when there are none
+        if True, runs over range of time periods, finding best move for each time period, then produces probability weights proportional to the sum of time periods that resulting in each move.
+    '''
+    def __init__(self, fen, player, hack_probs=False):
+        self.fen = fen
+        self.player = player
+        self.children = {}
+        self.hack_probs = hack_probs
+        
+    def predict_top_moves(self, fen, B):
+        
+        self.player.set_fen_position(fen)
+        if not self.hack_probs:
+            move = self.player.get_best_move()
+            return [(move, 1.0)]
+        else:
+            moves = collections.Counter()
+            ts = [10, 25, 100, 250, 1000]
+            for t in ts:
+                move = self.player.get_best_move_time(t)
+                moves[move] += float(t) / sum(ts)
+            return moves.most_common()[:B]

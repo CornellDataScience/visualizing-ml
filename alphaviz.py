@@ -42,6 +42,7 @@ class ChessGui(tk.Frame):
         self.selected_piece = None
         self.highlighted_imgs = []
         self.highlighted_rects = []  # reference to all highlighted squares
+        self.arrows = []
 
         # Set parent GUI element (most likely root)
         self.parent = parent
@@ -243,9 +244,25 @@ class ChessGui(tk.Frame):
         if DEBUG:
             print('ChessGui.board_to_fen() executing...')
 
+    def arrow_helper(self):
+        for tup in self.arrows:
+            first_x = tup[0]
+            first_y = tup[1]
+            second_x = tup[2]
+            second_y = tup[3]
+            self.canvas.create_line(first_x, first_y,
+                                second_x, second_y, fill=constantss.MONOKAI_ORANGEH, width=10, arrow=tk.LAST)
+
     def start_arrow(self, first_x, first_y, second_x, second_y):
-        self.canvas.create_line(first_x, first_y,
-                                second_x, second_y, fill='blue', width=10, arrow=tk.LAST)
+        tup = (first_x, first_y, second_x, second_y)
+        self.arrows.append(tup)
+        
+        self.canvas.delete('all')
+        self.draw_board()
+        self.highlight_helper()
+        self.arrow_helper()
+        self.draw_pieces()
+
         global arrow
         global draw_arrow
         arrow = False
@@ -401,12 +418,14 @@ class ChessGui(tk.Frame):
             self.canvas.delete('all')
             self.draw_board()
             self.highlight_helper()
+            self.arrow_helper()
             self.draw_pieces()
         else:
             self.highlighted_rects.append(tup)
             self.canvas.delete('all')
             self.draw_board()
             self.highlight_helper()
+            self.arrow_helper()
             self.draw_pieces()
 
     def addpiece(self, name, image, row=0, column=0):
@@ -533,6 +552,7 @@ class ChessGui(tk.Frame):
         self.canvas.delete('all')
         self.highlighted_img = []
         self.highlighted_rects = []
+        self.arrows = []
         self.draw_board()
         self.draw_pieces()
 

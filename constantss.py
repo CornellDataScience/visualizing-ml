@@ -5,6 +5,11 @@ FEN_EMPTY = '4k3/8/8/8/8/8/8/4K3 b - - 0 1'
 FEN_1E4 = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1'
 FEN_IMMORTAL_GAME = 'r1bk2nr/p2p1pNp/n2B1Q2/1p1NP2P/6P1/3P4/P1P1K3/q5b1 w - - 0 1'
 FEN_ALPHASTOCKFISH7 = '4r3/1b2n1pk/1p1r1p2/pP1p1Pn1/P1pP1NPp/2N1P2P/2R3B1/5RK1 b - - 0 1'
+#Source: https://www.youtube.com/watch?v=JacRX6cKIaY, 
+#        https://chess24.com/en/watch/live-tournaments/alphazero-vs-stockfish/3/1/5
+# Black to move (Move 24. h4... awaiting black's move)
+# Notes: AlphaZero plays e4g5 (Kg5) which 'blunders the knight but is winning long term...
+FEN_ALPHASTOCKFISH8 = 'r4r1k/1p2p1b1/2ppb2p/p1Pn1p1q/N1NPn1pP/1P2P1P1/P1Q1BP2/2RRB1K1 b - - 24 1'
 
 
 BOARD_SIZE = 700 # pixel width and height of chessboard.png
@@ -50,11 +55,18 @@ PATH_DKPAWN = r'imgs/pawn_dark.png'
 PATH_LTUNICORN = r'imgs/unicorn_light.png'
 PATH_DKUNICORN = r'imgs/unicorn_dark.png'
 
-PATH_AQUA_HIGHLIGHT = r'imgs/aqua_highlight.png'
-PATH_GREEN_HIGHLIGHT = r'imgs/green_highlight.png'
-PATH_RED_HIGHLIGHT = r'imgs/red_highlight.png'
-PATH_YELLOW_HIGHLIGHT = r'imgs/yellow_highlight.png'
-PATH_MAGENTA_HIGHLIGHT = r'imgs/magenta_highlight.png'
+# Source: https://www.color-hex.com/color-palette/94102
+MONOKAI_RED = (255,97,136)
+MONOKAI_REDH = '#ff6188'
+MONOKAI_ORANGE = (252,152,103)
+MONOKAI_ORANGEH = '#fc9867'
+MONOKAI_YELLOW = (255,216,102)
+MONOKAI_YELLOWH = '#ffd866'
+MONOKAI_GREEN = (169,220,118)
+MONOKAI_GREENH = '#a9dc76'
+MONOKAI_BLUE = (120,220,232)
+MONOKAI_BLUEH = '#78dce8'
+MONOKAI_PURPLE = (174,129,255)
 
 
 # RANDOM FEN STRINGS FOR TESTING:

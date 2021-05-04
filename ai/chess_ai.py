@@ -181,6 +181,27 @@ class ChessTreeNode:
         plt.show()
         return total_grid
     
+    # returns json for further use
+    def jsonify(self):
+        d = {'fen': self.fen, 'children':{}}
+        for move, (child, move_p) in self.children.items():
+            d['children'][move] = (child.jsonify(), move_p)
+        return d
+    
+    # get top sequences with dfs
+    def get_all_sequences(self):
+
+        def helper(node, paths):
+            if len(node.children) == 0:
+                return paths
+            new_paths = []
+            for move, (child, move_p) in node.children.items():
+                new_paths += helper(child, [(path + [move], path_p * move_p) for (path,path_p) in paths])
+            return new_paths
+
+        paths = sorted(helper(self, [([], 1.0)]), key=lambda x:x[1], reverse=True)
+        return paths
+    
 class StockfishTreeNode(ChessTreeNode):
     
     '''

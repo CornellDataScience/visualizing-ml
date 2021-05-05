@@ -9,11 +9,13 @@ import PIL.Image
 import re
 from tkinter import *
 from functools import partial
+import json
+import math
 # TODO: uncomment
 # from ai.chess_ai import *
 
-DEBUG = True
-CORN = False
+DEBUG = False
+CORN = True
 global double_click_flag
 
 global arrow
@@ -167,6 +169,7 @@ class ChessGui(tk.Frame):
             print(f'ChessGui.load_fen(\'{fen_string}\') executing...')
 
         self.reset_board_state()
+        self.clear_board()
 
         if validateFEN.fenPass(fen_string):
             if DEBUG:
@@ -330,16 +333,6 @@ class ChessGui(tk.Frame):
         square = y_square*8 + x_square
         self.highlight(square)
 
-<<<<<<< HEAD
-        if self.board[square] >= 7:
-            # Then black piece, i.e. AI
-            # TODO: Display all possible moves from the AI
-            self.highlight(square, color="blue")
-        elif self.board[square] >= 1:
-            # Then white piece, i.e. human player
-            # TODO: display all moves
-            self.display_moves(square)
-=======
         # Not sure what this is for yet
         # if self.board[square] >= 7:
         #     # Then black piece, i.e. AI
@@ -349,7 +342,6 @@ class ChessGui(tk.Frame):
         #     # Then white piece, i.e. human player
         #     # TODO: display all moves
         #     self.display_moves(square)
->>>>>>> 0fbb76acd1d935609b950cf1c44536cc200bc4d3
 
     def display_moves(self, square):
         letters = self.letters_from_square(square)
@@ -577,6 +569,11 @@ class ChessGui(tk.Frame):
         else:
             print(
                 f'[ERROR] ChessGui.input_fen() failed to execute on "{fen_input}"')
+        
+        if(fen_input == '4r1k1/2n1bppp/p3p3/1p6/8/1P2B1P1/P3PPBP/R5K1 w - - 1 1'
+        or fen_input == 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
+        or fen_input == '4r3/1b2n1pk/1p1r1p2/pP1p1Pn1/P1pP1NPp/2N1P2P/2R3B1/5RK1 b - - 0 1'):
+            self.heatmap_analysis(fen_input)
 
     def clear_board(self):
         if DEBUG:
@@ -604,7 +601,56 @@ class ChessGui(tk.Frame):
             print("ChessGui.exit() executing...")
         self.parent.destroy()
 
+    def heatmap_analysis(self, fen_input):
+        with open('formattedtree.json') as f:
+            tree_dict = json.load(f)
 
+        tree = None
+
+        if(fen_input == 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'):
+            tree = tree_dict[0]
+        elif(fen_input == '4r3/1b2n1pk/1p1r1p2/pP1p1Pn1/P1pP1NPp/2N1P2P/2R3B1/5RK1 b - - 0 1'):
+            tree = tree_dict[1]
+        elif(fen_input == '4r1k1/2n1bppp/p3p3/1p6/8/1P2B1P1/P3PPBP/R5K1 w - - 1 1'):
+            tree = tree_dict[2]
+
+        sequences = tree['sequences']
+
+        for seq in sequences[0:min(8, len(sequences))]:
+            self.display_sequence(seq, 'green', arrow=True)
+
+        for seq in sequences[8:min(15, len(sequences))]:
+            self.display_sequence(seq, 'green')
+        if(DEBUG):
+            print("ChessGui.heatmap_analysis() executed!")
+
+    def show_move_with_arrows(self, move):
+        start = move[0] + move[1]
+        end = move[2] + move[3]
+        start_coords = constantss.LOOKUP_PIX[start]
+        end_coords = constantss.LOOKUP_PIX[end]
+        #Apply coordinate transform
+        start_coords = (start_coords[0] + constantss.BOARD_OFFSET, constantss.BOARD_SIZE - start_coords[1] - constantss.BOARD_OFFSET)
+        end_coords = (end_coords[0] + constantss.BOARD_OFFSET, constantss.BOARD_SIZE - end_coords[1] - constantss.BOARD_OFFSET)
+        self.start_arrow(start_coords[0], start_coords[1], end_coords[0], end_coords[1])
+
+    def display_sequence(self, seq_dict, color, arrow=False):
+        seq = seq_dict[0]
+        prob = seq_dict[1]
+
+        if(arrow):
+            first_move = seq[0]
+            response = seq[1]
+            self.show_move_with_arrows(first_move)
+            self.show_move_with_arrows(response)
+
+        for move in seq:
+            start = move[0] + move[1]
+            target = move[2] + move[3]
+            start_sq = int(constantss.LOOKUP_NUM[start])
+            target_sq = int(constantss.LOOKUP_NUM[target])
+            self.highlight(start_sq, 'red', max(0.25, prob))
+            self.highlight(target_sq, color, max(0.25, prob))
 def display():
     root = tk.Tk()
     root.title('AlphaViz')
@@ -615,7 +661,6 @@ def display():
     root.mainloop()
     if DEBUG:
         print('display() completed gracefully')
-
 
 if __name__ == "__main__":
     display()

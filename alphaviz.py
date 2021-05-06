@@ -51,9 +51,9 @@ class ChessGui(tk.Frame):
         self.os_type = 'windows'
         assert self.os_type in ['windows','linux']
         if self.os_type == 'linux':
-            self.stockfish_player = Stockfish('./stockfish_13_linux_x64')
+            self.stockfish_player = Stockfish(r'./stockfish_13_linux_x64')
         elif self.os_type == 'windows':
-            self.stockfish_player = Stockfish('./stockfish_13_win_x64')
+            self.stockfish_player = Stockfish(r'./stockfish_13_win_x64.exe')
 
         # json for storing trees
         self.json_tree_path = 'formatted_trees.json'

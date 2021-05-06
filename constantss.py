@@ -11,7 +11,7 @@ FEN_ALPHASTOCKFISH7 = '4r3/1b2n1pk/1p1r1p2/pP1p1Pn1/P1pP1NPp/2N1P2P/2R3B1/5RK1 b
 #        https://chess24.com/en/watch/live-tournaments/alphazero-vs-stockfish/3/1/5
 # Black to move (Move 24. h4... awaiting black's move)
 # Notes: AlphaZero plays e4g5 (Kg5) which 'blunders the knight but is winning long term...
-FEN_ALPHASTOCKFISH8 = 'r4r1k/1p2p1b1/2ppb2p/p1Pn1p1q/N1NPn1pP/1P2P1P1/P1Q1BP2/2RRB1K1 b - - 24 1'
+FEN_ALPHASTOCKFISH8 = 'r4r1k/1p2p1b1/2ppb2p/p1Pn1p1q/N1NPn1pP/1P2P1P1/P1Q1BP2/2RRB1K1 b - - 0 24'
 
 
 BOARD_SIZE = 700 # pixel width and height of chessboard.png

@@ -87,6 +87,10 @@ class ChessGui(tk.Frame):
         # below the chessboard canvas
         self.statusbar = tk.Frame(self, height=64)
 
+        self.button_reopen = tk.Button(
+            self.statusbar, text="REOPEN", fg="black", command=self.reopen)
+        self.button_reopen.pack(side=tk.LEFT, in_=self.statusbar)
+
         # Create new game button and link it to the function self.reset()
         self.button_new = tk.Button(
             self.statusbar, text="NEW", fg="black", command=self.reset)
@@ -137,6 +141,10 @@ class ChessGui(tk.Frame):
         self.button_best_move.pack(side=tk.RIGHT, in_=self.statusbar)
         self.statusbar.pack(expand=False, fill="x", side='bottom')
         '''
+
+    def reopen(self):
+        self.exit()
+        exec(open('temporary.py').read())
 
     def load_images(self):
         self.IMG_CHESSBOARD = ImageTk.PhotoImage(

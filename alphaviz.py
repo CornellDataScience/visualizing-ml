@@ -11,8 +11,10 @@ from tkinter import *
 from functools import partial
 import json
 import math
+import os
 # TODO: uncomment
-# from ai.chess_ai import *
+from ai.chess_ai import StockfishTreeNode
+from stockfish import Stockfish
 
 DEBUG = False
 CORN = True
@@ -44,6 +46,17 @@ class ChessGui(tk.Frame):
 
         global double_click_flag
         double_click_flag = False
+
+        # stockfish model
+        self.os_type = 'windows'
+        assert self.os_type in ['windows','linux']
+        if self.os_type == 'linux':
+            self.stockfish_player = Stockfish('./stockfish_13_linux_x64')
+        elif self.os_type == 'windows':
+            self.stockfish_player = Stockfish('./stockfish_13_win_x64')
+
+        # json for storing trees
+        self.json_tree_path = 'formatted_trees.json'
 
         # GUI display variables
         self.selected = None  # selected square
@@ -452,6 +465,16 @@ class ChessGui(tk.Frame):
             self.draw_pieces()
             self.arrow_helper()
 
+    def highlight_multiple(self, squares, colors, alphas):
+        self.highlighted_rects = []
+        for tup in zip(squares, colors, alphas):
+            self.highlighted_rects.append(tup)
+        self.canvas.delete('all')
+        self.draw_board()
+        self.highlight_helper()
+        self.draw_pieces()
+        self.arrow_helper()
+
     def addpiece(self, name, image, row=0, column=0):
         if DEBUG:
             print('ChessGui.addpiece() executing...')
@@ -553,6 +576,7 @@ class ChessGui(tk.Frame):
         self.full_moves = 1
 
     def input_fen(self):
+        
         if DEBUG:
             print('ChessGui.input_fen() executing...')
         # uses partial from functools to help call load_fen with arguments from the button
@@ -569,10 +593,12 @@ class ChessGui(tk.Frame):
             print(
                 f'[ERROR] ChessGui.input_fen() failed to execute on "{fen_input}"')
 
-        if(fen_input == '4r1k1/2n1bppp/p3p3/1p6/8/1P2B1P1/P3PPBP/R5K1 w - - 1 1'
-           or fen_input == 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
-           or fen_input == '4r3/1b2n1pk/1p1r1p2/pP1p1Pn1/P1pP1NPp/2N1P2P/2R3B1/5RK1 b - - 0 1'):
-            self.heatmap_analysis(fen_input)
+        # if(fen_input == '4r1k1/2n1bppp/p3p3/1p6/8/1P2B1P1/P3PPBP/R5K1 w - - 1 1'
+        #    or fen_input == 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
+        #    or fen_input == '4r3/1b2n1pk/1p1r1p2/pP1p1Pn1/P1pP1NPp/2N1P2P/2R3B1/5RK1 b - - 0 1'):
+        if DEBUG:
+            print("heatmap")
+        self.heatmap_analysis(fen_input)
 
     def clear_board(self):
         if DEBUG:
@@ -601,29 +627,60 @@ class ChessGui(tk.Frame):
         self.parent.destroy()
 
     def heatmap_analysis(self, fen_input):
-        with open('formattedtree.json') as f:
+        with open(self.json_tree_path, 'r') as f:
             tree_dict = json.load(f)
-
         f.close()
+        if DEBUG:
+            print("loaded json")
 
-        tree = None
+        sequences = None
 
-        if(fen_input == 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'):
-            tree = tree_dict[0]
-        elif(fen_input == '4r3/1b2n1pk/1p1r1p2/pP1p1Pn1/P1pP1NPp/2N1P2P/2R3B1/5RK1 b - - 0 1'):
-            tree = tree_dict[1]
-        elif(fen_input == '4r1k1/2n1bppp/p3p3/1p6/8/1P2B1P1/P3PPBP/R5K1 w - - 1 1'):
-            tree = tree_dict[2]
+        if fen_input in tree_dict:
+            sequences = tree_dict[fen_input]['sequences']
+        else:
+            tree = StockfishTreeNode(
+                fen_input,
+                self.stockfish_player,
+                hack_probs=True
+            ).build_tree(
+                fen_input,
+                B = 3,
+                depth = 6
+            )
+            sequences = [[seq,p] for (seq,p) in tree.get_all_sequences()]
+            # write to json to save time in future
+            tree_dict[fen_input] = {
+                'fen': fen_input,
+                'json': tree.jsonify(),
+                'sequences': sequences
+            }
+            json.dump(tree_dict, open(self.json_tree_path, 'w'))
 
-        sequences = tree['sequences']
+        # if(fen_input == 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'):
+        #     sequences = tree_dict[0]['sequences']
+        # elif(fen_input == '4r3/1b2n1pk/1p1r1p2/pP1p1Pn1/P1pP1NPp/2N1P2P/2R3B1/5RK1 b - - 0 1'):
+        #     sequences = tree_dict[1]['sequences']
+        # elif(fen_input == '4r1k1/2n1bppp/p3p3/1p6/8/1P2B1P1/P3PPBP/R5K1 w - - 1 1'):
+        #     sequences = tree_dict[2]['sequences']
 
-        for seq in sequences[0:min(8, len(sequences))]:
-            self.display_sequence(seq, 'green', arrow=True)
+        if DEBUG:
+            print("sequences")
+            print(sequences)
 
-        for seq in sequences[8:min(15, len(sequences))]:
-            self.display_sequence(seq, 'green')
+        self.display_multiple_sequences(
+            sequences[0:min(15, len(sequences))],
+            ['green' for _ in range(min(15, len(sequences)))],
+            [(i < 8) for i in range(min(15, len(sequences)))]
+        )
+
+        # for seq in sequences[0:min(8, len(sequences))]:
+        #     self.display_sequence(seq, 'green', arrow=True)
+
+        # for seq in sequences[8:min(15, len(sequences))]:
+        #     self.display_sequence(seq, 'green')
         if(DEBUG):
             print("ChessGui.heatmap_analysis() executed!")
+            print("display sequence")
 
     def show_move_with_arrows(self, move):
         start = move[0] + move[1]
@@ -647,14 +704,59 @@ class ChessGui(tk.Frame):
             response = seq[1]
             self.show_move_with_arrows(first_move)
             self.show_move_with_arrows(response)
+        if DEBUG:
+            print("show move with arrows")
 
+        squares = []
+        colors = []
+        vals = []
         for move in seq:
             start = move[0] + move[1]
             target = move[2] + move[3]
             start_sq = int(constantss.LOOKUP_NUM[start])
             target_sq = int(constantss.LOOKUP_NUM[target])
-            self.highlight(start_sq, 'red', max(0.25, prob))
-            self.highlight(target_sq, color, max(0.25, prob))
+            squares.extend([start_sq,target_sq])
+            colors.extend(['red', color])
+            vals.extend([max(0.25, prob), max(0.25, prob)])
+        self.highlight_multiple(squares, colors, vals)
+
+        # for move in seq:
+        #     start = move[0] + move[1]
+        #     target = move[2] + move[3]
+        #     start_sq = int(constantss.LOOKUP_NUM[start])
+        #     target_sq = int(constantss.LOOKUP_NUM[target])
+        #     print(start_sq, target_sq)
+        #     self.highlight(start_sq, 'red', max(0.25, prob))
+        #     self.highlight(target_sq, color, max(0.25, prob))
+        #     print("highlight")
+
+    def display_multiple_sequences(self, seqs, colors, use_arrows):
+
+        squares = []
+        clrs = []
+        vals = []
+
+        for seq_dict, color, use_arrow in zip(seqs, colors, use_arrows):
+            seq = seq_dict[0]
+            prob = seq_dict[1]
+            if use_arrow:
+                first_move = seq[0]
+                response = seq[1]
+                self.show_move_with_arrows(first_move)
+                self.show_move_with_arrows(response)
+            for move in seq:
+                start = move[0] + move[1]
+                target = move[2] + move[3]
+                start_sq = int(constantss.LOOKUP_NUM[start])
+                target_sq = int(constantss.LOOKUP_NUM[target])
+                squares.extend([start_sq,target_sq])
+                clrs.extend(['red', color])
+                vals.extend([max(0.25, prob), max(0.25, prob)])
+
+        if DEBUG:
+            print(squares, clrs, vals)
+
+        self.highlight_multiple(squares, clrs, vals)
             
 def display():
     root = tk.Tk()

@@ -1,7 +1,7 @@
 
-from ai.chess-alpha-zero.src.chess_zero.manager import *
-from chess-alpha-zero.src.chess_zero.worker.evaluate import *
-from chess-alpha-zero.src.chess_zero.env.chess_env import canon_input_planes, maybe_flip_fen, is_black_turn
+# from ai.chess-alpha-zero.src.chess_zero.manager import *
+# from chess-alpha-zero.src.chess_zero.worker.evaluate import *
+# from chess-alpha-zero.src.chess_zero.env.chess_env import canon_input_planes, maybe_flip_fen, is_black_turn
 
 from collections import namedtuple
 import chess.pgn

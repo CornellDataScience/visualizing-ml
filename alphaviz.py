@@ -605,6 +605,8 @@ class ChessGui(tk.Frame):
         with open('formattedtree.json') as f:
             tree_dict = json.load(f)
 
+        f.close()
+
         tree = None
 
         if(fen_input == 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'):
@@ -651,6 +653,7 @@ class ChessGui(tk.Frame):
             target_sq = int(constantss.LOOKUP_NUM[target])
             self.highlight(start_sq, 'red', max(0.25, prob))
             self.highlight(target_sq, color, max(0.25, prob))
+            
 def display():
     root = tk.Tk()
     root.title('AlphaViz')

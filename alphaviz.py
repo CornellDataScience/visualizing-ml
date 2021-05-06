@@ -696,12 +696,7 @@ class ChessGui(tk.Frame):
             [(i < 8) for i in range(min(15, len(sequences)))]
         )
 
-        # for seq in sequences[0:min(8, len(sequences))]:
-        #     self.display_sequence(seq, 'green', arrow=True)
-
-        # for seq in sequences[8:min(15, len(sequences))]:
-        #     self.display_sequence(seq, 'green')
-        self.display_text(tree)
+        self.display_text(sequences)
         if(DEBUG):
             print("ChessGui.heatmap_analysis() executed!")
             print("display sequence")
@@ -777,19 +772,18 @@ class ChessGui(tk.Frame):
                 clrs.extend(['red', color])
                 vals.extend([max(0.25, prob), max(0.25, prob)])
 
-    def display_text(self, tree):
+    def display_text(self, sequences):
         # self.log = self.canvas.create_rectangle(canvas_width + 20, 10, canvas_width+550, canvas_height-5, fill='red')
         canvas_width = self.IMG_CHESSBOARD.width()
         canvas_height = self.IMG_CHESSBOARD.height()
         self.text_x = canvas_width + 30
         self.text_y = 15
-        sequences = tree["sequences"]
         dy = 0
         spacing = 5
-        for i in range(len(sequences)):
+        for i in range(min(len(sequences), 10)):
             dx = 0
             move = sequences[i][0]
-            probability = sequences[i][1]
+            probability = float(sequences[i][1])
             p_lbl = tk.Label(text="Probability: " + str(probability)[:4], fg="green")
             p_lbl.place(x=self.text_x + dx, y = self.text_y + dy)
             dx += p_lbl.winfo_reqwidth() + spacing
@@ -799,7 +793,7 @@ class ChessGui(tk.Frame):
                 c = "#001DB2" # light blue
                 if i % 2 == 0:
                     c = "#3377FF" # dark blue
-                lbl = tk.Label(text=s, fg=c, cursor="hand")
+                lbl = tk.Label(text=s, fg=c, cursor="hand1")
                 lbl.place(x = self.text_x + dx, y = self.text_y + dy)
                 disp_fun = lambda elem, lbl, b : (lambda x : self.disp_move(x, elem, lbl, b))
                 lbl.bind("<Button-1>", disp_fun(elem,lbl, i%2 == 0))

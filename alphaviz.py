@@ -3,6 +3,7 @@ from typing import cast
 import constantss
 import validateFEN
 import tkinter as tk
+import tkinter.scrolledtext as tkst
 from PIL import ImageTk
 import PIL.Image
 # import PIL.ImageTk
@@ -137,6 +138,9 @@ class ChessGui(tk.Frame):
         self.button_best_move.pack(side=tk.RIGHT, in_=self.statusbar)
         self.statusbar.pack(expand=False, fill="x", side='bottom')
         '''
+
+        self.last_disp = None
+
 
     def load_images(self):
         self.IMG_CHESSBOARD = ImageTk.PhotoImage(
@@ -353,8 +357,8 @@ class ChessGui(tk.Frame):
                     continue
                 to_letters = self.letters_from_square(square)
                 # TODO: fix errors then uncomment below
-                if valid_move(fen, letters + to_letters):
-                    self.highlight(to_square, "blue")
+                # if valid_move(fen, letters + to_letters):
+                #     self.highlight(to_square, "blue")
 
     # Returns letters of the square, e.g. "e1"
 
@@ -362,6 +366,11 @@ class ChessGui(tk.Frame):
         x_sq = square % 8
         y_sq = 1 + int(square / 8)
         return "abcdefgh"[x_sq] + str(y_sq)
+
+    def square_from_letters(self, letters):
+        row = int(letters[1]) - 1
+        col = ord(letters[0]) - ord("a")
+        return row * 8 + col
 
     # Returns top left coordinates of square
     def coord_from_square(self, square):
@@ -390,43 +399,46 @@ class ChessGui(tk.Frame):
         if DEBUG:
             print('ChessGui.move() executing...')
 
-    def highlight_helper(self):
-        for tup in self.highlighted_rects:
-            sq = tup[0]
-            color = tup[1]
-            alpha = tup[2]
+    def perform_highlight(self, tup):
+        sq = tup[0]
+        color = tup[1]
+        alpha = tup[2]
 
-            x_pix = int(sq % 8) * constantss.SQUARE_SIZE
-            y_pix = int(sq / 8) * constantss.SQUARE_SIZE
-            # Coordinate transfrom (x', y') = (0,0) is lower left (with margin) to
-            # (x,y) = (0,0) is upper left without margin. (x = x' + 30, y = 700 - 30 - 80 - y' - 1)
-            x_pos = x_pix + constantss.BOARD_OFFSET
-            y_pos = constantss.BOARD_SIZE - constantss.BOARD_OFFSET - \
+        x_pix = int(sq % 8) * constantss.SQUARE_SIZE
+        y_pix = int(sq / 8) * constantss.SQUARE_SIZE
+        # Coordinate transfrom (x', y') = (0,0) is lower left (with margin) to
+        # (x,y) = (0,0) is upper left without margin. (x = x' + 30, y = 700 - 30 - 80 - y' - 1)
+        x_pos = x_pix + constantss.BOARD_OFFSET
+        y_pos = constantss.BOARD_SIZE - constantss.BOARD_OFFSET - \
                 y_pix - constantss.SQUARE_SIZE - 1
 
-            alpha = int(alpha * 255)
-            base = color  # If color is a tuple, we will use it directly
-            if(color == 'red'):
-                base = constantss.MONOKAI_RED
-            elif(color == 'orange'):
-                base = constantss.MONOKAI_ORANGE
-            elif(color == 'yellow'):
-                base = constantss.MONOKAI_YELLOW
-            elif(color == 'green'):
-                base = constantss.MONOKAI_GREEN
-            elif(color == 'blue'):
-                base = constantss.MONOKAI_BLUE
-            elif(color == 'purple'):
-                base = constantss.MONOKAI_PURPLE
-            else:
-                print("Possible error in highlight() if color was not a tuple...")
+        alpha = int(alpha * 255)
+        base = color  # If color is a tuple, we will use it directly
+        if (color == 'red'):
+            base = constantss.MONOKAI_RED
+        elif (color == 'orange'):
+            base = constantss.MONOKAI_ORANGE
+        elif (color == 'yellow'):
+            base = constantss.MONOKAI_YELLOW
+        elif (color == 'green'):
+            base = constantss.MONOKAI_GREEN
+        elif (color == 'blue'):
+            base = constantss.MONOKAI_BLUE
+        elif (color == 'purple'):
+            base = constantss.MONOKAI_PURPLE
+        else:
+            print("Possible error in highlight() if color was not a tuple...")
 
-            color = base + (alpha,)
-            image = PIL.Image.new(
-                'RGBA', (constantss.SQUARE_SIZE, constantss.SQUARE_SIZE), color)
-            self.highlighted_imgs.append(ImageTk.PhotoImage(image))
-            self.canvas.create_image(
-                x_pos, y_pos, anchor='nw', image=self.highlighted_imgs[-1])
+        color = base + (alpha,)
+        image = PIL.Image.new(
+            'RGBA', (constantss.SQUARE_SIZE, constantss.SQUARE_SIZE), color)
+        self.highlighted_imgs.append(ImageTk.PhotoImage(image))
+        return self.canvas.create_image(
+            x_pos, y_pos, anchor='nw', image=self.highlighted_imgs[-1])
+
+    def highlight_helper(self):
+        for tup in self.highlighted_rects:
+            self.perform_highlight(tup)
 
     # Highlights the square at the event.x, event.y
     def highlight(self, sq, color='purple', alpha=0.65):
@@ -435,6 +447,7 @@ class ChessGui(tk.Frame):
             print(f'ChessGui.highlight() on square [{algsq}]...')
 
         tup = (sq, color, alpha)
+
 
         if(tup in self.highlighted_rects):
             self.highlighted_rects.remove(tup)
@@ -600,9 +613,12 @@ class ChessGui(tk.Frame):
             print("ChessGui.exit() executing...")
         self.parent.destroy()
 
+
+
     def heatmap_analysis(self, fen_input):
         with open('formattedtree.json') as f:
             tree_dict = json.load(f)
+
 
         tree = None
 
@@ -613,6 +629,8 @@ class ChessGui(tk.Frame):
         elif(fen_input == '4r1k1/2n1bppp/p3p3/1p6/8/1P2B1P1/P3PPBP/R5K1 w - - 1 1'):
             tree = tree_dict[2]
 
+
+
         sequences = tree['sequences']
 
         for seq in sequences[0:min(8, len(sequences))]:
@@ -622,6 +640,8 @@ class ChessGui(tk.Frame):
             self.display_sequence(seq, 'green')
         if(DEBUG):
             print("ChessGui.heatmap_analysis() executed!")
+        self.display_text(tree)
+
 
     def show_move_with_arrows(self, move):
         start = move[0] + move[1]
@@ -653,6 +673,56 @@ class ChessGui(tk.Frame):
             target_sq = int(constantss.LOOKUP_NUM[target])
             self.highlight(start_sq, 'red', max(0.25, prob))
             self.highlight(target_sq, color, max(0.25, prob))
+
+    def display_text(self, tree):
+        # self.log = self.canvas.create_rectangle(canvas_width + 20, 10, canvas_width+550, canvas_height-5, fill='red')
+        canvas_width = self.IMG_CHESSBOARD.width()
+        canvas_height = self.IMG_CHESSBOARD.height()
+        self.text_x = canvas_width + 30
+        self.text_y = 15
+        sequences = tree["sequences"]
+        dy = 0
+        spacing = 5
+        for i in range(len(sequences)):
+            dx = 0
+            move = sequences[i][0]
+            probability = sequences[i][1]
+            p_lbl = tk.Label(text="Probability: " + str(probability)[:4], fg="green")
+            p_lbl.place(x=self.text_x + dx, y = self.text_y + dy)
+            dx += p_lbl.winfo_reqwidth() + spacing
+            i = 0
+            for elem in move:
+                s = str(i+1) + ". " + elem[:2] + "→" + elem[2:]
+                c = "#001DB2" # light blue
+                if i % 2 == 0:
+                    c = "#3377FF" # dark blue
+                lbl = tk.Label(text=s, fg=c, cursor="hand")
+                lbl.place(x = self.text_x + dx, y = self.text_y + dy)
+                disp_fun = lambda elem, lbl, b : (lambda x : self.disp_move(x, elem, lbl, b))
+                lbl.bind("<Button-1>", disp_fun(elem,lbl, i%2 == 0))
+                lbl.bind("<Button-2>", lambda e: self.hide_move(e))
+                lbl.bind("<Button-3>", lambda e: self.hide_move(e))
+                dx += lbl.winfo_reqwidth() + spacing
+                i += 1
+            dy += p_lbl.winfo_reqheight() + spacing
+
+    def hide_move(self, event = None):
+        if self.last_disp is None:
+            return
+        self.canvas.delete(self.last_disp[0])
+        self.canvas.delete(self.last_disp[1])
+
+
+    def disp_move(self, event, moveseq,lbl, b):
+        square1 = self.square_from_letters(moveseq[:2])
+        square2 = self.square_from_letters(moveseq[2:])
+        self.hide_move()
+        if b:
+            color = "blue"
+        else:
+            color = "purple"
+        self.last_disp = (self.perform_highlight((square1, color, 0.5)),
+                          self.perform_highlight((square2, color, 0.5)))
 
 
 def display():

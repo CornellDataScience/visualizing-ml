@@ -23,13 +23,9 @@ global draw_arrow
 global first_x
 global first_y
 global converted_x
-converted_x = 200
 global converted_x2
-converted_x2 = 300
 global converted_y
-converted_y = 200
 global converted_y2
-converted_y2 = 300
 
 arrow = False
 draw_arrow = False
@@ -40,6 +36,7 @@ class ChessGui(tk.Frame):
     # Initializes the AlphaViz GUI
     # Sets many instance variables, loads images used for the GUI, creates
     # most GUI components, and prepares the GUI for human interaction.
+
     def __init__(self, parent):
         if DEBUG:
             print("DEBUG MODE: ON")
@@ -132,13 +129,14 @@ class ChessGui(tk.Frame):
                                       command=self.activate_arrow)
         self.button_arrow.pack(side=tk.RIGHT, in_=self.statusbar)
         self.statusbar.pack(expand=False, fill="x", side='bottom')
+        self.reset()
 
+        '''
         self.button_best_move = tk.Button(text='Show Best Move',
                                           command=self.draw_AI_arrow)
         self.button_best_move.pack(side=tk.RIGHT, in_=self.statusbar)
         self.statusbar.pack(expand=False, fill="x", side='bottom')
-
-        self.reset()
+        '''
 
     def load_images(self):
         self.IMG_CHESSBOARD = ImageTk.PhotoImage(
@@ -268,12 +266,12 @@ class ChessGui(tk.Frame):
             second_x = tup[2]
             second_y = tup[3]
             self.canvas.create_line(first_x, first_y,
-                                second_x, second_y, fill=constantss.MONOKAI_ORANGEH, width=10, arrow=tk.LAST)
+                                    second_x, second_y, fill=constantss.MONOKAI_ORANGEH, width=10, arrow=tk.LAST)
 
     def start_arrow(self, first_x, first_y, second_x, second_y):
         tup = (first_x, first_y, second_x, second_y)
         self.arrows.append(tup)
-        
+
         self.canvas.delete('all')
         self.draw_board()
         self.highlight_helper()
@@ -294,7 +292,6 @@ class ChessGui(tk.Frame):
         global converted_x2
         global converted_y
         global converted_y2
-        print("hello!")
         self.start_arrow(converted_x, converted_y, converted_x2, converted_y2)
 
     def left_click(self, event):
@@ -306,20 +303,21 @@ class ChessGui(tk.Frame):
         y_pix = constantss.BOARD_SIZE - constantss.BOARD_OFFSET - \
             event.y  # [-30, 670] bottom to top
         if arrow:
-            #print("hello")
+            # print("hello")
             draw_arrow = True
             first_x = event.x
             first_y = event.y
             arrow = False
         elif draw_arrow:
-            #print("hello2")
+            # print("hello2")
             self.start_arrow(first_x, first_y, event.x, event.y)
         if DEBUG:
             print(f'left_click() at ({x_pix},{y_pix})')
 
     def right_click(self, event):
         x_pix = event.x - constantss.BOARD_OFFSET  # [-30, 670] left to right
-        y_pix = constantss.BOARD_SIZE - constantss.BOARD_OFFSET - event.y  # [-30, 670] bottom to top
+        y_pix = constantss.BOARD_SIZE - constantss.BOARD_OFFSET - \
+            event.y  # [-30, 670] bottom to top
         if DEBUG:
             print(f'right_click() at ({x_pix},{y_pix})')
 
@@ -392,7 +390,6 @@ class ChessGui(tk.Frame):
         if DEBUG:
             print('ChessGui.move() executing...')
 
-
     def highlight_helper(self):
         for tup in self.highlighted_rects:
             sq = tup[0]
@@ -408,7 +405,7 @@ class ChessGui(tk.Frame):
                 y_pix - constantss.SQUARE_SIZE - 1
 
             alpha = int(alpha * 255)
-            base = color #If color is a tuple, we will use it directly
+            base = color  # If color is a tuple, we will use it directly
             if(color == 'red'):
                 base = constantss.MONOKAI_RED
             elif(color == 'orange'):
@@ -425,21 +422,23 @@ class ChessGui(tk.Frame):
                 print("Possible error in highlight() if color was not a tuple...")
 
             color = base + (alpha,)
-            image = PIL.Image.new('RGBA', (constantss.SQUARE_SIZE, constantss.SQUARE_SIZE), color)
+            image = PIL.Image.new(
+                'RGBA', (constantss.SQUARE_SIZE, constantss.SQUARE_SIZE), color)
             self.highlighted_imgs.append(ImageTk.PhotoImage(image))
-            self.canvas.create_image(x_pos, y_pos, anchor='nw', image=self.highlighted_imgs[-1])
+            self.canvas.create_image(
+                x_pos, y_pos, anchor='nw', image=self.highlighted_imgs[-1])
 
     # Highlights the square at the event.x, event.y
     def highlight(self, sq, color='purple', alpha=0.65):
         algsq = self.letters_from_square(sq)
         if DEBUG:
             print(f'ChessGui.highlight() on square [{algsq}]...')
-        
+
         tup = (sq, color, alpha)
 
         if(tup in self.highlighted_rects):
-            self.highlighted_rects.remove(tup) 
-                
+            self.highlighted_rects.remove(tup)
+
             self.canvas.delete('all')
             self.draw_board()
             self.highlight_helper()
@@ -569,10 +568,10 @@ class ChessGui(tk.Frame):
         else:
             print(
                 f'[ERROR] ChessGui.input_fen() failed to execute on "{fen_input}"')
-        
+
         if(fen_input == '4r1k1/2n1bppp/p3p3/1p6/8/1P2B1P1/P3PPBP/R5K1 w - - 1 1'
-        or fen_input == 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
-        or fen_input == '4r3/1b2n1pk/1p1r1p2/pP1p1Pn1/P1pP1NPp/2N1P2P/2R3B1/5RK1 b - - 0 1'):
+           or fen_input == 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
+           or fen_input == '4r3/1b2n1pk/1p1r1p2/pP1p1Pn1/P1pP1NPp/2N1P2P/2R3B1/5RK1 b - - 0 1'):
             self.heatmap_analysis(fen_input)
 
     def clear_board(self):
@@ -589,7 +588,7 @@ class ChessGui(tk.Frame):
     def reset(self):
         if DEBUG:
             print('ChessGui.reset() executing...')
-
+        self.update()
         # Reset board state
         self.canvas.delete('all')
         self.draw_board()
@@ -631,10 +630,13 @@ class ChessGui(tk.Frame):
         end = move[2] + move[3]
         start_coords = constantss.LOOKUP_PIX[start]
         end_coords = constantss.LOOKUP_PIX[end]
-        #Apply coordinate transform
-        start_coords = (start_coords[0] + constantss.BOARD_OFFSET, constantss.BOARD_SIZE - start_coords[1] - constantss.BOARD_OFFSET)
-        end_coords = (end_coords[0] + constantss.BOARD_OFFSET, constantss.BOARD_SIZE - end_coords[1] - constantss.BOARD_OFFSET)
-        self.start_arrow(start_coords[0], start_coords[1], end_coords[0], end_coords[1])
+        # Apply coordinate transform
+        start_coords = (start_coords[0] + constantss.BOARD_OFFSET,
+                        constantss.BOARD_SIZE - start_coords[1] - constantss.BOARD_OFFSET)
+        end_coords = (end_coords[0] + constantss.BOARD_OFFSET,
+                      constantss.BOARD_SIZE - end_coords[1] - constantss.BOARD_OFFSET)
+        self.start_arrow(
+            start_coords[0], start_coords[1], end_coords[0], end_coords[1])
 
     def display_sequence(self, seq_dict, color, arrow=False):
         seq = seq_dict[0]
@@ -664,6 +666,7 @@ def display():
     root.mainloop()
     if DEBUG:
         print('display() completed gracefully')
+
 
 if __name__ == "__main__":
     display()

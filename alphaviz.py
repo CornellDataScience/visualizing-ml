@@ -49,10 +49,10 @@ class ChessGui(tk.Frame):
         double_click_flag = False
 
         # stockfish model
-        self.os_type = 'windows'
+        self.os_type = 'windows' # CHANGE THIS DEPENDING ON SYSTEM OS
         assert self.os_type in ['windows','linux']
         if self.os_type == 'linux':
-            self.stockfish_player = Stockfish(r'./stockfish_13_linux_x64')
+            self.stockfish_player = Stockfish(r'./stockfish_13_linux_x64.exe')
         elif self.os_type == 'windows':
             self.stockfish_player = Stockfish(r'./stockfish_13_win_x64.exe')
 
@@ -690,13 +690,14 @@ class ChessGui(tk.Frame):
             print("sequences")
             print(sequences)
 
+        self.display_text(sequences)
+
         self.display_multiple_sequences(
             sequences[0:min(15, len(sequences))],
             ['green' for _ in range(min(15, len(sequences)))],
             [(i < 8) for i in range(min(15, len(sequences)))]
         )
 
-        self.display_text(sequences)
         if(DEBUG):
             print("ChessGui.heatmap_analysis() executed!")
             print("display sequence")
@@ -772,6 +773,8 @@ class ChessGui(tk.Frame):
                 clrs.extend(['red', color])
                 vals.extend([max(0.25, prob), max(0.25, prob)])
 
+        self.highlight_multiple(squares, clrs, vals)
+
     def display_text(self, sequences):
         # self.log = self.canvas.create_rectangle(canvas_width + 20, 10, canvas_width+550, canvas_height-5, fill='red')
         canvas_width = self.IMG_CHESSBOARD.width()
@@ -780,7 +783,7 @@ class ChessGui(tk.Frame):
         self.text_y = 15
         dy = 0
         spacing = 5
-        for i in range(min(len(sequences), 10)):
+        for i in range(min(len(sequences), 20)):
             dx = 0
             move = sequences[i][0]
             probability = float(sequences[i][1])
@@ -821,15 +824,16 @@ class ChessGui(tk.Frame):
         self.last_disp = (self.perform_highlight((square1, color, 0.5)),
                           self.perform_highlight((square2, color, 0.5)))
 
-        if DEBUG:
-            print(squares, clrs, vals)
+        # if DEBUG:
+        #     print(squares, clrs, vals)
 
-        self.highlight_multiple(squares, clrs, vals)
+        #self.highlight_multiple(squares, clrs, vals)
             
 def display():
     root = tk.Tk()
     root.title('AlphaViz')
     root.resizable(width=False, height=False)
+    root.wm_geometry("1280x760")
 
     gui = ChessGui(root)
     gui.pack(side="top", fill="both", expand="true", padx=4, pady=4)

@@ -783,7 +783,7 @@ class ChessGui(tk.Frame):
         self.text_y = 15
         dy = 0
         spacing = 5
-        for i in range(min(len(sequences), 20)):
+        for i in range(min(len(sequences), 5)):
             dx = 0
             move = sequences[i][0]
             probability = float(sequences[i][1])
